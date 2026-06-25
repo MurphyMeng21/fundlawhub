@@ -98,18 +98,20 @@ Fetch valid codes from `GET /law-search/search/enumData`:
 - `flfgfl` tree → `flfgCodeId` values (use **leaf** codes, e.g., `230` 地方性法规, not `221` 地方法规)
 - `zdjgfl` tree → `zdjgCodeId` values (use leaf codes, e.g., `350` 广东/珠海)
 
-For region classification, prefer `zdjgCodeId` filters when possible. If you must classify from `zdjgName` strings, use the bundled helper:
+For region classification, prefer `zdjgCodeId` filters when possible. If you must classify from `zdjgName` strings, use the bundled `region_classifier.py`:
 
 ```python
-from scripts.authority_map import categorize_by_authority
+from scripts.region_classifier import classify_search_results, build_existence_matrix, save_existence_matrix
 
-for item in items:
-    info = categorize_by_authority(item["authority"])
-    item["region"] = info["region"]      # e.g. "宁夏回族自治区"
-    item["level"] = info["level"]        # e.g. "provincial"
+# Add province/city/level columns to collected items
+classified = classify_search_results(items)
+
+# Generate 32-province existence matrix
+matrix = build_existence_matrix(classified)
+save_existence_matrix(matrix, "existence_matrix.csv")
 ```
 
-This handles irregular naming such as "宁夏回族自治区人大常务委员会".
+This handles irregular naming such as "宁夏回族自治区人大常务委员会" and city-level authorities that don't include the province name (e.g. "广州市人民代表大会常务委员会" → 广东省).
 
 ## Phase 2: Batch Download (Download API)
 

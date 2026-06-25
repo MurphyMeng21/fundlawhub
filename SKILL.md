@@ -132,16 +132,37 @@ python scripts/download.py --download {bbbs_id} --format docx output.doc
 
 ### Authority / Region Categorization
 
-Issuing authority names (`zdjgName`) are irregular, especially for autonomous regions. Use the bundled helper instead of string matching:
+Issuing authority names (`zdjgName`) are irregular, especially for autonomous regions, and city-level authorities usually do not include the province name. Use the bundled `region_classifier.py` instead of string matching:
 
 ```python
-from scripts.authority_map import categorize_by_authority
+from scripts.region_classifier import classify_by_authority
 
-categorize_by_authority("宁夏回族自治区人大常务委员会")
-# {'region': '宁夏回族自治区', 'level': 'provincial', 'authority': '...'}
+classify_by_authority("广州市人民代表大会常务委员会")
+# {
+#   "province": "广东省",
+#   "province_short": "广东",
+#   "city": "广州市",
+#   "level": "city",
+#   "is_municipality": False,
+#   "authority": "广州市人民代表大会常务委员会"
+# }
 ```
 
-The helper covers all 34 provincial-level regions and common naming variants. For classification tasks, prefer the official `zdjgfl` codes from `GET /law-search/search/enumData` when available; use `categorize_by_authority()` for post-processing search results.
+The classifier covers all provincial-level regions, ~370 city/prefecture-level divisions, and common naming variants. For classification tasks, prefer the official `zdjgfl` codes from `GET /law-search/search/enumData` when available; use `region_classifier.py` for post-processing search results.
+
+CLI usage:
+
+```bash
+# Run built-in tests
+python scripts/region_classifier.py --test
+
+# Classify search results from download.py --urls-only
+python scripts/download.py --search "物业管理条例" --urls-only --size 100 > urls.json
+python scripts/region_classifier.py --classify < urls.json > classified.json
+
+# Generate province existence matrix
+python scripts/region_classifier.py --matrix matrix.csv < classified.json
+```
 
 ### For 200-300 File Collection Tasks
 
