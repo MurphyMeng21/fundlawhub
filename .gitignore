@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Downloaded artifacts
+*.doc
+*.docx
+*.pdf
+*.ofd
+
+# OS
+.DS_Store
+Thumbs.db
