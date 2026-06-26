@@ -6,6 +6,8 @@ A Claude Code / Kimi Agent skill for accessing China's **National Laws and Regul
 
 Search, browse, download, and classify Chinese legal documents — including constitutional laws, statutes, administrative regulations, local regulations, judicial interpretations, and supervisory regulations.
 
+> **中文**：这是一个用于访问中国国家法律法规数据库（`flk.npc.gov.cn`）的 Claude Code / Kimi Agent skill。支持搜索、浏览、下载和分类中国法律文件，包括宪法、法律、行政法规、地方性法规、司法解释和监察法规。
+
 ---
 
 ## 中文
