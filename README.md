@@ -18,6 +18,7 @@ Search, browse, download, and classify Chinese legal documents — including con
 - **精确 / 模糊策略**：根据任务自动选择精确标题匹配或模糊匹配，减少噪音。
 - **批量采集**：支持一次性采集 200–300 条法规的完整工作流。
 - **下载文件**：支持 DOCX（WPS 版）和 PDF（公报原版）下载。
+- **获取单条/多条法条**：下载整部法规 DOCX 后，在本地只提取指定条款（如民法典第 217 条），避免把全文塞进 agent 上下文，节省 token。
 - **URL 导出**：云端 agent 可只导出签名下载 URL，供本地下载使用。
 - **地域自动分类**：内置 ~370 个地市/自治州到省份的映射，自动识别省级、设区市级、国家级。
 - **存在性矩阵**：生成 32 省级行政区 × 法规类型的存在性矩阵 CSV。
@@ -41,12 +42,45 @@ python scripts/download.py --search "物业管理条例" --exact --size 100
 # 只导出签名下载 URL（云端 agent 友好）
 python scripts/download.py --search "出租车" --urls-only --size 100 > urls.json
 
-# 下载单条法规
+# 下载单部法规
 python scripts/download.py --download <bbbs_id> --format docx output.doc
+
+# 获取单条法条（本地解析 DOCX，只返回目标条款）
+python scripts/article.py 217 民法典
+
+# 批量获取多条法条
+python scripts/article.py 51,211,347 民法典 --json
 
 # 查看元数据
 python scripts/download.py --info <bbbs_id>
 ```
+
+### 获取单条/多条法条
+
+当你只需要核对某一条或某几条法条时，不必把整部法规塞进 agent 上下文。`scripts/article.py` 会下载该法规的 DOCX，在本地提取指定条款，默认附带前后各 1 条作为上下文：
+
+```bash
+# 单条法条
+python scripts/article.py 217 民法典
+
+# 多条法条（逗号分隔）
+python scripts/article.py 51,211,347 民法典
+
+# JSON 输出
+python scripts/article.py 217 民法典 --json
+
+# 只输出目标条，不带上下文
+python scripts/article.py 217 民法典 --context 0
+
+# 保留下载的 DOCX
+python scripts/article.py 217 民法典 --keep-docx 民法典.docx
+```
+
+`article.py` 支持两种法规定位方式：
+- 32 位 `bbbs_id`（十六进制）
+- 搜索关键词（自动取搜索结果第一条，并在 stderr 打印选中法规的标题）
+
+> **说明**：`article.py` 会先尝试最常见的“第X条”中文数字编号快速提取；若失败，则自动调用 detail API 从目录树探测实际编号风格（中文数字 / 阿拉伯数字 / 列表式），然后重新提取。
 
 ### 地域分类
 
@@ -87,7 +121,8 @@ npc-law-db/
 ├── requirements.txt              # Python 依赖
 ├── scripts/
 │   ├── download.py               # 搜索、下载、导出 URL
-│   └── region_classifier.py      # 地域分类与存在性矩阵
+│   ├── region_classifier.py      # 地域分类与存在性矩阵
+│   └── article.py                # 单条/批量法条提取
 └── references/
     ├── api_reference.md          # API 端点与参数参考
     ├── batch_collection.md       # 200-300 条批量采集指南
@@ -110,6 +145,7 @@ npc-law-db/
 - **Exact / fuzzy strategy**: Automatically choose exact title match or fuzzy match based on the task to reduce noise.
 - **Batch collection**: Complete workflow for collecting 200–300 regulations at once.
 - **Download files**: Supports DOCX (WPS version) and PDF (gazette version).
+- **Extract single / multiple articles**: After downloading a regulation DOCX, extract only the requested articles locally (e.g. Civil Code Article 217) without loading the full text into the agent context.
 - **URL export**: Cloud agents can export signed download URLs only, for local batch downloading.
 - **Region auto-classification**: Built-in mapping of ~370 prefecture-level divisions to provinces; automatically identifies national, provincial, and city-level authorities.
 - **Existence matrix**: Generate a 32-province × regulation-type matrix as CSV.
@@ -136,9 +172,42 @@ python scripts/download.py --search "taxi" --urls-only --size 100 > urls.json
 # Download a single regulation
 python scripts/download.py --download <bbbs_id> --format docx output.doc
 
+# Extract a single article (parse DOCX locally, return only the target article)
+python scripts/article.py 217 "Civil Code"
+
+# Extract multiple articles
+python scripts/article.py 51,211,347 "Civil Code" --json
+
 # View metadata
 python scripts/download.py --info <bbbs_id>
 ```
+
+### Extract Single / Multiple Articles
+
+When you only need to verify one or a few articles, there's no need to load the full regulation into the agent context. `scripts/article.py` downloads the regulation DOCX and extracts only the requested articles locally, with 1 neighbouring article on each side by default:
+
+```bash
+# Single article
+python scripts/article.py 217 "Civil Code"
+
+# Multiple articles (comma-separated)
+python scripts/article.py 51,211,347 "Civil Code"
+
+# JSON output
+python scripts/article.py 217 "Civil Code" --json
+
+# Only the target article, no context
+python scripts/article.py 217 "Civil Code" --context 0
+
+# Keep the downloaded DOCX
+python scripts/article.py 217 "Civil Code" --keep-docx civil_code.docx
+```
+
+`article.py` accepts two kinds of law identifiers:
+- 32-character `bbbs_id` (hex)
+- Search keyword (uses the first search result; prints the selected title to stderr)
+
+> **Note**: `article.py` first tries the most common `第X条` Chinese-numeral format. If any target article is missing, it calls the detail API once to detect the actual numbering style from the TOC (Chinese numerals / Arabic numerals / dotted list) and re-extracts.
 
 ### Region Classification
 
@@ -179,7 +248,8 @@ npc-law-db/
 ├── requirements.txt              # Python dependencies
 ├── scripts/
 │   ├── download.py               # Search, download, URL export
-│   └── region_classifier.py      # Region classification & matrix
+│   ├── region_classifier.py      # Region classification & matrix
+│   └── article.py                # Single / batch article extraction
 └── references/
     ├── api_reference.md          # API endpoint & parameter reference
     ├── batch_collection.md       # 200-300 file batch collection guide

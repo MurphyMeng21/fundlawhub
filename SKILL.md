@@ -132,6 +132,37 @@ python scripts/download.py --download {bbbs_id} --format docx output.doc
 
 > **Note:** The `ossFile` paths from the detail API are **not** directly downloadable. The site serves the SPA index page for those URLs. Always use the download API or browser download button.
 
+### Single / Multiple Article Extraction
+
+When you only need to verify one or a few articles, avoid loading the full regulation into the agent context. `scripts/article.py` downloads the DOCX, parses it locally, and returns only the requested articles (plus optional neighbours).
+
+```bash
+# Single article by keyword
+python scripts/article.py 217 民法典
+
+# Multiple articles (comma-separated)
+python scripts/article.py 51,211,347 民法典 --json
+
+# No neighbour context
+python scripts/article.py 217 民法典 --context 0
+
+# Keep the downloaded DOCX
+python scripts/article.py 217 民法典 --keep-docx civil_code.docx
+```
+
+The `law` argument can be either a 32-char `bbbs_id` or a search keyword. If it is a keyword, the tool uses the first search result and prints the selected title to stderr so the agent/user can verify.
+
+**How it works:**
+1. Download the regulation DOCX once.
+2. **Fast path**: try the most common `第X条` Chinese-numeral numbering. If all requested articles are found, return immediately.
+3. **Fallback**: if any article is missing, call the detail API once, inspect `content.children` (the TOC tree) to detect the actual numbering style (`chinese`, `arabic`, or `dotted`), then re-extract.
+4. Collect `(target - context)` through `(target + context)` for each found article, deduplicate overlapping windows, and output plain text or JSON.
+
+Supported numbering styles:
+- `chinese`: `第一条`, `第二百一十七条`
+- `arabic`: `第1条`, `第217条`
+- `dotted`: `1.`, `1、`
+
 ### Authority / Region Categorization
 
 Issuing authority names (`zdjgName`) are irregular, especially for autonomous regions, and city-level authorities usually do not include the province name. Use the bundled `region_classifier.py` instead of string matching:
