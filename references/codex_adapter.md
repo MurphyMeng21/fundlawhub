@@ -1,144 +1,196 @@
-# Codex Chrome Plugin Environment Adapter
+# Codex 浏览器环境适配器
 
-Use this adapter when running in Codex with the Chrome browser plugin.
+运行在 Codex Desktop 或 Chrome 插件时使用此适配器。
 
-## Browser Tool Mapping
+## 浏览器工具入口
 
-Codex controls Chrome directly. Tool names differ from Kimi. Map as follows:
+Codex 通过 `mcp__node_repl__js`（Node REPL）提供浏览器控制能力。**没有 `browser_navigate`、`browser_type`、`browser_click` 这类独立工具**。所有浏览器操作都通过 `tab` 对象的 Playwright API 完成。
 
-| Kimi Tool | Codex Equivalent | Notes |
-|-----------|-----------------|-------|
-| `browser_visit(url)` | `browser_navigate(url)` or `@chrome open {url}` | Navigate to URL |
-| `browser_click(index)` | `browser_click(x, y)` or element selector | Codex may use coordinates or CSS selectors |
-| `browser_input(index, text)` | `browser_type(selector, text)` or `@chrome type {text}` | Text input |
-| `browser_scroll_down(amount)` | `browser_scroll(x, y, dx, dy)` or `@chrome scroll {amount}` | Scroll page |
-| `browser_find(keyword)` | `browser_find(keyword)` or manual scroll+search | Find text on page |
-| `browser_screenshot()` | `browser_screenshot()` or `@chrome screenshot` | Capture view |
-| `browser_state()` | Check Chrome tabs manually | Tab management |
+**入口：`mcp__node_repl__js`（Node REPL 内的 js 执行工具）**
 
-**Important**: Codex's Chrome plugin may use natural language commands like:
-- `@chrome open https://flk.npc.gov.cn`
-- `@chrome click the search button`
-- `@chrome type "劳动合同法" into the search box`
-- `@chrome scroll down`
+## 引导（Bootstrap）
 
-Adapt the workflow below to your Codex tool format. The **page structure** and **element locations** remain the same regardless of tool syntax.
+首次使用浏览器前，先加载 `browser-client` 运行时。只需运行一次：
 
-## Standard Workflow
+```js
+const { setupBrowserRuntime } = await import(
+  // 实际路径由插件版本号决定，agent 运行时会自动找到
+  "<plugin-root>/scripts/browser-client.mjs"
+);
+await setupBrowserRuntime({ globals: globalThis });
 
-### Search by Title
+// 获取浏览器实例
+globalThis.browser = await agent.browsers.get("iab");  // Codex Desktop in-app browser
+// 或
+globalThis.browser = await agent.browsers.get("extension");  // Chrome 插件
 
-```
-# 1. Open home page
-browser_navigate("https://flk.npc.gov.cn/index")
-# or: @chrome open flk.npc.gov.cn
-
-# 2. Type keyword in the center search input
-browser_type("input[placeholder*='请输入']", "keyword")
-# or: @chrome type "keyword" in the search box
-
-# 3. Click the magnifying glass search button (right of input)
-browser_click("button.search-btn")  # or by coordinates
-# or: @chrome click the search button
-
-# 4. Wait for /search results page to load
-# Screenshot to verify results appeared
-
-# 5. Click a law title to enter detail page
-browser_click("div.law-title:contains('目标法规')")
-# or: @chrome click the law titled "xxx"
-
-# 6. On detail page, click 下载, then click 点击下载
-browser_click("span:contains('下载')")
-# Wait for download panel, then:
-browser_click("div:contains('点击下载')")
-# File downloads to Chrome's default download folder
+// 阅读完整 API 参考
+nodeRepl.write(await browser.documentation());
 ```
 
-### Batch ID Collection (Fastest Approach)
+## 核心 API 映射
 
-For 200-300 files, use this two-phase strategy:
+| 操作 | Kimi Bridge 写法 | Codex 实际写法 |
+|------|-----------------|----------------|
+| 打开页面 | `browser_visit(url)` | `tab.goto(url)` |
+| 截图 | `browser_screenshot()` | `tab.screenshot({ fullPage: true })` 并用 `nodeRepl.emitImage(bytes)` 展示 |
+| 输入文字 | `browser_input(index, text)` | `tab.playwright.getByRole("textbox", { name: "请输入" }).fill("关键词")` 或 `tab.playwright.locator("input").fill("文本")` |
+| 按键盘 | — | `tab.playwright.locator.press("Enter")` |
+| 点击 | `browser_click(index)` | `tab.playwright.getByText("目标").click()` 或 `tab.playwright.locator(".selector").click()` |
+| 滚动 | `browser_scroll_down(n)` | `tab.playwright.locator("target").scrollIntoViewIfNeeded()` 或 `tab.playwright.evaluate(() => window.scrollBy(0, 300))` |
+| 查找元素 | `browser_find(keyword)` | `tab.playwright.domSnapshot()`（返回可访问性快照文本）或 `tab.playwright.getByText("内容")` |
+| 获取页标题 | — | `tab.title()` |
+| 获取页面 URL | — | `tab.url()` |
+| 等页面加载 | — | `tab.playwright.waitForLoadState({ state: "load" })` |
+| 固定等待 | — | `tab.playwright.waitForTimeout(ms)` |
+| 执行 JS | — | `tab.playwright.evaluate(fn)` |
+| 打开新标签 | — | `browser.tabs.new()` |
+| 列出标签 | `browser_state()` | `browser.tabs.list()` 或 `browser.user.openTabs()` |
 
-**Phase 1: Collect all IDs via browser**
+## 标准工作流
 
+### 按标题搜索
+
+```js
+// 1. 打开首页
+await tab.goto("https://flk.npc.gov.cn/index");
+await tab.playwright.waitForLoadState({ state: "load" });
+
+// 2. 在搜索框中输入关键词
+const searchBox = tab.playwright.getByRole("textbox", { name: "请输入" });
+await searchBox.fill("物业管理条例");
+
+// 3. 按回车触发搜索
+// 注意：页面上的 🔍 图标实际导航到高级检索页（/advanceSearch），不要点它
+await searchBox.press("Enter");
+await tab.playwright.waitForTimeout(2000);
+
+// 4. 通过 DOM 快照检查搜索结果
+const snapshot = await tab.playwright.domSnapshot();
+// 快照返回类似：
+//   text: 北京市
+//   emphasis: 物业
+//   emphasis: 管理条例
+//   generic: 有效
+//   generic: 公布日期：2024-03-29
+//   ...
+
+// 5. 点击目标法规标题进入详情页
+// 搜索结果中的标题是复合节点（纯文本 + <em> 高亮标签），需要用 evaluate 定位
+await tab.playwright.evaluate(() => {
+  const labels = document.querySelectorAll(".el-checkbox__label");
+  for (const label of labels) {
+    if (label.textContent.includes("北京市") && label.textContent.includes("物业管理条例")) {
+      label.click();
+      return;
+    }
+  }
+});
+await tab.playwright.waitForTimeout(2000);
+
+// 6. 在详情页下载文件
+// 先点"下载"按钮，再点"点击下载"
+await tab.playwright.evaluate(() => {
+  const spans = document.querySelectorAll("span");
+  for (const span of spans) {
+    if (span.textContent.trim() === "下载") { span.click(); break; }
+  }
+});
+await tab.playwright.waitForTimeout(1000);
+await tab.playwright.evaluate(() => {
+  const divs = document.querySelectorAll("div");
+  for (const div of divs) {
+    if (div.textContent.trim() === "点击下载") { div.click(); break; }
+  }
+});
 ```
-# 1. Search with large page size
-browser_navigate("https://flk.npc.gov.cn/search")
-browser_type("search-input", "your-keyword")
-browser_click("search-button")
 
-# 2. Change page size to 100 (maximum)
-# Scroll to bottom, find "20条/页" dropdown, select "100条/页"
+### 使用截图验证状态
 
-# 3. For each page:
-#    - Screenshot or extract all law titles and their IDs
-#    - Click next page
-#    - Repeat until done
-
-# 4. Compile a list of all bbbs IDs
+```js
+const pngBytes = await tab.screenshot({ fullPage: true });
+await nodeRepl.emitImage(pngBytes);
 ```
 
-**Phase 2: Batch download via script + API**
+### 批量采集（200-300 条）
+
+**阶段一：通过浏览器收集所有法规 ID**
+
+```js
+// 1. 搜索 + 每页设 100 条
+await tab.goto("https://flk.npc.gov.cn/index");
+const searchBox = tab.playwright.getByRole("textbox", { name: "请输入" });
+await searchBox.fill("物业管理条例");
+await searchBox.press("Enter");
+await tab.playwright.waitForTimeout(2000);
+
+// 2. 翻到页面底部，选定 100 条/页
+await tab.playwright.evaluate(() => {
+  // 找到分页下拉框，点开
+  const pagination = document.querySelector(".el-pagination .el-select");
+  if (pagination) pagination.click();
+});
+await tab.playwright.waitForTimeout(500);
+await tab.playwright.evaluate(() => {
+  // 选择 100 条/页
+  const items = document.querySelectorAll(".el-select-dropdown__item");
+  for (const item of items) {
+    if (item.textContent.trim().startsWith("100")) { item.click(); break; }
+  }
+});
+await tab.playwright.waitForTimeout(2000);
+
+// 3. 提取当前页所有 bbbs ID
+const pageIds = await tab.playwright.evaluate(() => {
+  const items = document.querySelectorAll("[data-id]");
+  return Array.from(items).map(el => el.getAttribute("data-id"));
+});
+
+// 4. 翻页继续提取...
+// 点击"下一页"按钮，重复步骤 3
+```
+
+**阶段二：通过 Python 脚本从 API 批量下载**
 
 ```bash
-# Use the bundled Python script with Codex's Python execution
-python scripts/download.py --info {bbbs_id_1}
-python scripts/download.py --info {bbbs_id_2}
-# ... for each ID, collect file URLs
+# 对每个收集到的 bbbs ID 获取详情
+python scripts/download.py --info {bbbs_id}
 
-# Then download each file
-python scripts/download.py "{file_url_1}" "output_1.docx"
-python scripts/download.py "{file_url_2}" "output_2.docx"
+# 下载文件
+python scripts/download.py --download {bbbs_id} --format docx output.doc
 ```
 
-Or create a batch script in Codex:
+### 读取 DOM 辅助信息
 
-```python
-import subprocess, json, os
+```js
+// 读取页面标题
+const title = await tab.title();
 
-ids = [...]  # Your collected bbbs IDs
-os.makedirs("downloads", exist_ok=True)
+// 读取特定元素文本
+const text = await tab.playwright.getByText("关键词").textContent();
 
-for i, bbbs_id in enumerate(ids):
-    result = subprocess.run(
-        ["python", "scripts/download.py", "--info", bbbs_id],
-        capture_output=True, text=True
-    )
-    # Parse output to extract ossWordPath URL
-    # Then download: browser_navigate(url) or python requests
-    print(f"[{i+1}/{len(ids)}] Processed {bbbs_id}")
+// 批量读取列表文本
+const items = await tab.playwright.locator(".result-item .title").allTextContents();
+
+// 用 evaluate 直接操作 DOM（只读）
+const data = await tab.playwright.evaluate(() => {
+  return Array.from(document.querySelectorAll("[data-id]")).map(el => ({
+    id: el.getAttribute("data-id"),
+    text: el.textContent?.trim()
+  }));
+});
 ```
 
-## File Storage
+## 已知问题和注意事项
 
-- Files download to **Chrome's default download folder**
-- Use `@chrome download` or check `~/Downloads/` (macOS) / `C:\Users\{user}\Downloads\` (Windows)
-- For organization: Create a target folder and move downloaded files there
-- **Advantage over cloud**: No storage limits, files persist permanently
+1. **不存在独立浏览器工具**：Codex 没有 `browser_navigate`、`browser_type`、`browser_click` 等独立工具名，所有操作都通过 Node REPL 内 `tab.playwright.*` 完成，或通过 `@chrome` 自然语言指令（Chrome 插件模式）。
 
-## Codex-Specific Tips
+2. **🔍 搜索按钮 ≠ 标准搜索**：首页输入框后缀区域的放大镜图标点击后实际导航到 `/advanceSearch`（高级检索），而不是标准搜索结果页 `/search`。**请用回车键** `press("Enter")` 触发标准搜索。
 
-- **Chrome is your real browser**: If automation fails, you can manually click in Chrome while Codex watches
-- **Screenshots are crucial**: Use `@chrome screenshot` frequently to verify state
-- **Natural language works**: Codex often understands "click the search button" better than element indices
-- **Console access**: Open Chrome DevTools (F12) to run JavaScript for extracting data:
-  ```javascript
-  // Extract all law IDs from current search page
-  Array.from(document.querySelectorAll('[data-id]')).map(el => el.dataset.id)
-  ```
-- **URL manipulation**: Codex can directly navigate to constructed URLs, e.g.:
-  ```
-  @chrome open https://flk.npc.gov.cn/detail?id={bbbs_id}
-  ```
+3. **搜索结果标题是复合 DOM 节点**：匹配的文字被拆成 `<em>` 高亮标签 + 纯文本节点。不能用简单的 `getByText("北京市物业管理条例")` 一次性定位。推荐用 `evaluate` 遍历节点的 `textContent` 做匹配。
 
-## Browser Console Method (for API Discovery)
+4. **保持 `tab` 引用**：一次 bootstrap 后 `tab` 变量跨 Node REPL 调用保持有效。不需要每次都重新获取，除非发生 reset 或主动切换标签页。
 
-Since you have full Chrome access, use DevTools Console to discover APIs:
+5. **优先用 API 路径**：`scripts/download.py` 的 API 方式比自己用浏览器导航+点击更可靠。浏览器方案仅作为 API 失败或需要 UI 交互时的回退。
 
-1. Open Chrome DevTools (F12) → Network tab
-2. Perform an action on the website (e.g., search, download)
-3. Watch the Network tab for API requests
-4. Right-click → Copy → Copy as cURL (fetch)
-5. Paste into Codex to replicate
-
-See `references/api_reference.md` → "Browser Console Method" section for detailed steps.
+6. **标签页清理**：浏览器使用结束后调用 `browser.tabs.finalize({ keep })` 释放资源。只保留用户需要看到的标签页。

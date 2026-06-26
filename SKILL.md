@@ -1,6 +1,6 @@
 ---
 name: npc-law-db
-description: Access and retrieve laws/regulations from China's National Laws and Regulations Database (flk.npc.gov.cn). Use when the user needs to search, browse, download, or extract Chinese legal documents including constitutional laws, statutes, administrative regulations, local regulations, judicial interpretations, and supervisory regulations. Covers searching by title/content, advanced filtering by category/issuing authority/effective status/date ranges, pagination, sorting, batch download, and single document download. Supports multi-environment browser automation (Kimi native, Claude Code via kimi-bridge, Codex Chrome plugin).
+description: Access and retrieve laws/regulations from China's National Laws and Regulations Database (flk.npc.gov.cn). Use when the user needs to search, browse, download, or extract Chinese legal documents including constitutional laws, statutes, administrative regulations, local regulations, judicial interpretations, and supervisory regulations. Covers searching by title/content, advanced filtering by category/issuing authority/effective status/date ranges, pagination, sorting, batch download, and single document download. Supports multi-environment browser automation (Kimi native, Claude Code via kimi-bridge, Codex).
 ---
 
 # National Laws and Regulations Database (国家法律法规数据库)
@@ -15,9 +15,11 @@ This skill supports multiple agent environments. **Read the adapter for your env
 |-------------|-----------|-------------------|
 | **Kimi Agent (cloud)** | `references/kimi_bridge_adapter.md` | Native `mshtools-browser_*` tools |
 | **Claude Code (local)** | `references/kimi_bridge_adapter.md` | Invoke the `kimi-webbridge` skill first to obtain browser tools |
-| **Codex (Chrome plugin)** | `references/codex_adapter.md` | Chrome browser plugin |
+| **Codex** | `references/codex_adapter.md` | `mcp__node_repl__js` (Node REPL) for browser control |
 
 > **Claude Code quick start:** Before running any browser workflow, tell the user to run `/kimi-webbridge` (or invoke the `kimi-webbridge` skill). The browser tools (`browser_visit`, `browser_click`, etc.) referenced in this skill are provided by that bridge, not by Claude Code natively.
+>
+> **Codex quick start:** All browser operations use the Playwright API through the Node REPL (`mcp__node_repl__js`). Read `references/codex_adapter.md` for the complete bootstrap and API mapping. The adapter covers both Codex Desktop (in-app browser) and Codex Chrome plugin.
 
 ## Setup
 
@@ -101,7 +103,7 @@ Use this only when the API fails or for tasks that require the UI (e.g., advance
 ```
 1. Visit /index
 2. Enter keyword in search input (center of page)
-3. Click magnifying glass icon to search
+3. Press Enter to search (do not click the magnifying glass icon, which opens /advanceSearch)
 4. On /search results: click a title to open detail
 5. On /detail: click 下载 → 点击下载 to save file
 ```
