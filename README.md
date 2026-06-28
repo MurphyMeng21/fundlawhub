@@ -16,9 +16,14 @@ Search, browse, download, and classify Chinese legal documents — including con
 
 - **搜索法规**：通过标题或正文关键词搜索国家法律法规数据库。
 - **精确 / 模糊策略**：根据任务自动选择精确标题匹配或模糊匹配，减少噪音。
+- **全文搜索**：`--range content` 可在法规正文中搜索。
+- **状态筛选**：`--status 3` 只返回现行有效法规。
 - **批量采集**：支持一次性采集 200–300 条法规的完整工作流。
 - **下载文件**：支持 DOCX（WPS 版）和 PDF（公报原版）下载。
-- **获取单条/多条法条**：下载整部法规 DOCX 后，在本地只提取指定条款（如民法典第 217 条），避免把全文塞进 agent 上下文，节省 token。
+- **法规预览与单条法条查询**：`--preview` 查看结构，`--article` 按条号或关键词查询单部法规内的法条。
+- **跨法规法条级搜索**：`scripts/article_search.py` 按关键词搜索多部法规，返回具体匹配的法条。
+- **智能限速**：根据任务大小自动选择关闭/固定/自适应限速，避免 429。
+- **本地缓存**：搜索结果、元数据、DOCX 文件默认缓存，复访提速。
 - **URL 导出**：云端 agent 可只导出签名下载 URL，供本地下载使用。
 - **地域自动分类**：内置 ~370 个地市/自治州到省份的映射，自动识别省级、设区市级、国家级。
 - **存在性矩阵**：生成 32 省级行政区 × 法规类型的存在性矩阵 CSV。
@@ -30,6 +35,15 @@ Search, browse, download, and classify Chinese legal documents — including con
 pip install -r requirements.txt
 ```
 
+可选：部分旧法规使用 `.doc` 格式，需安装系统工具：
+
+```bash
+# macOS
+brew install antiword catdoc
+# Debian/Ubuntu
+apt-get install antiword catdoc
+```
+
 ### 快速开始
 
 ```bash
@@ -39,48 +53,110 @@ python scripts/download.py --search "出租车" --size 100
 # 精确搜索：适合已知法规名
 python scripts/download.py --search "物业管理条例" --exact --size 100
 
+# 在法规正文中搜索
+python scripts/download.py --search "违约金" --range content --size 50
+
+# 只返回现行有效法规
+python scripts/download.py --search "出租车" --status 3 --size 50
+
 # 只导出签名下载 URL（云端 agent 友好）
 python scripts/download.py --search "出租车" --urls-only --size 100 > urls.json
 
 # 下载单部法规
 python scripts/download.py --download <bbbs_id> --format docx output.doc
 
-# 获取单条法条（本地解析 DOCX，只返回目标条款）
-python scripts/article.py 217 民法典
+# 查看法规结构（编号模式、前 20 条）
+python scripts/download.py --preview <bbbs_id>
 
-# 批量获取多条法条
-python scripts/article.py 51,211,347 民法典 --json
+# 查询单部法规中的某一条（支持 第三十八条 / 第38条 / 38）
+python scripts/download.py --article <bbbs_id> "第三十八条"
+
+# 在单部法规中搜索关键词
+python scripts/download.py --article <bbbs_id> --grep "经济补偿"
+
+# 跨法规搜索含关键词的具体法条
+python scripts/article_search.py "违约金" --max-laws 5 --context 1
 
 # 查看元数据
 python scripts/download.py --info <bbbs_id>
+
+# 查看缓存状态
+python scripts/download.py --cache-stats
 ```
 
-### 获取单条/多条法条
+### 单条/多条法条查询
 
-当你只需要核对某一条或某几条法条时，不必把整部法规塞进 agent 上下文。`scripts/article.py` 会下载该法规的 DOCX，在本地提取指定条款，默认附带前后各 1 条作为上下文：
+当你只需要核对某一条或搜索某部法规内的关键词时，不必把整部法规塞进 agent 上下文。
 
 ```bash
-# 单条法条
-python scripts/article.py 217 民法典
+# 预览法规结构
+python scripts/download.py --preview <bbbs_id>
 
-# 多条法条（逗号分隔）
-python scripts/article.py 51,211,347 民法典
+# 按条号查询（自动识别中文/阿拉伯数字）
+python scripts/download.py --article <bbbs_id> "第三十八条"
+python scripts/download.py --article <bbbs_id> "第38条"
+python scripts/download.py --article <bbbs_id> "38"
 
-# JSON 输出
-python scripts/article.py 217 民法典 --json
-
-# 只输出目标条，不带上下文
-python scripts/article.py 217 民法典 --context 0
-
-# 保留下载的 DOCX
-python scripts/article.py 217 民法典 --keep-docx 民法典.docx
+# 在单部法规中 grep 关键词
+python scripts/download.py --article <bbbs_id> --grep "经济补偿"
 ```
 
-`article.py` 支持两种法规定位方式：
-- 32 位 `bbbs_id`（十六进制）
-- 搜索关键词（自动取搜索结果第一条，并在 stderr 打印选中法规的标题）
+### 跨法规法条级搜索
 
-> **说明**：`article.py` 会先尝试最常见的“第X条”中文数字编号快速提取；若失败，则自动调用 detail API 从目录树探测实际编号风格（中文数字 / 阿拉伯数字 / 列表式），然后重新提取。
+`scripts/article_search.py` 用于在多部法规中查找包含关键词的具体法条：
+
+```bash
+# 在标题含关键词的法规中搜索
+python scripts/article_search.py "违约金" --max-laws 5 --context 1
+
+# 在全文含关键词的法规中搜索
+python scripts/article_search.py "违约金" --range content --max-laws 5
+
+# 限定只查某一部法规
+python scripts/article_search.py "善意取得" --law 民法典 --context 0
+
+# JSON 输出
+python scripts/article_search.py "违约金" --max-laws 3 --json
+
+# 分批检索
+python scripts/article_search.py "违约金" --range content --max-laws 5
+python scripts/article_search.py "违约金" --range content --max-laws 5 --offset 5
+python scripts/article_search.py "违约金" --range content --max-laws 5 --resume
+```
+
+### 智能限速
+
+```bash
+# 默认自动模式
+python scripts/download.py --search "出租车" --urls-only --size 100
+
+# 强制固定 5 req/s
+python scripts/download.py --search "出租车" --urls-only --size 50 --rate-limit fixed
+
+# 自适应（大任务）
+python scripts/download.py --search "出租车" --urls-only --size 200 --rate-limit adaptive
+
+# 自定义速率
+python scripts/download.py --search "出租车" --urls-only --size 50 --rate-limit 3
+
+# 关闭限速（小任务）
+python scripts/download.py --info <bbbs_id> --rate-limit off
+```
+
+### 缓存管理
+
+```bash
+# 查看缓存
+python scripts/download.py --cache-stats
+
+# 单次禁用缓存
+python scripts/download.py --no-cache --info <bbbs_id>
+
+# 清空缓存
+python scripts/download.py --cache-clear
+```
+
+缓存位置：`~/.cache/npc-law-db/`
 
 ### 地域分类
 
@@ -120,9 +196,9 @@ npc-law-db/
 ├── README.md                     # 本文件
 ├── requirements.txt              # Python 依赖
 ├── scripts/
-│   ├── download.py               # 搜索、下载、导出 URL
-│   ├── region_classifier.py      # 地域分类与存在性矩阵
-│   └── article.py                # 单条/批量法条提取
+│   ├── download.py               # 搜索、下载、导出 URL、预览/查询法条
+│   ├── article_search.py         # 跨法规法条级关键词搜索
+│   └── region_classifier.py      # 地域分类与存在性矩阵
 └── references/
     ├── api_reference.md          # API 端点与参数参考
     ├── batch_collection.md       # 200-300 条批量采集指南
@@ -143,9 +219,14 @@ npc-law-db/
 
 - **Search regulations**: Search by title or full-text keyword in the NPC database.
 - **Exact / fuzzy strategy**: Automatically choose exact title match or fuzzy match based on the task to reduce noise.
+- **Full-text search**: `--range content` searches inside the body of laws.
+- **Status filter**: `--status 3` returns only currently effective laws.
 - **Batch collection**: Complete workflow for collecting 200–300 regulations at once.
 - **Download files**: Supports DOCX (WPS version) and PDF (gazette version).
-- **Extract single / multiple articles**: After downloading a regulation DOCX, extract only the requested articles locally (e.g. Civil Code Article 217) without loading the full text into the agent context.
+- **Preview and article lookup**: `--preview` shows structure; `--article` queries a specific article or keyword inside one law.
+- **Article-level search across laws**: `scripts/article_search.py` returns specific articles matching a keyword across multiple laws.
+- **Smart rate limiting**: Auto OFF / FIXED / ADAPTIVE based on task size to avoid 429 errors.
+- **Local cache**: Search results, metadata, and DOCX files are cached by default for faster repeat access.
 - **URL export**: Cloud agents can export signed download URLs only, for local batch downloading.
 - **Region auto-classification**: Built-in mapping of ~370 prefecture-level divisions to provinces; automatically identifies national, provincial, and city-level authorities.
 - **Existence matrix**: Generate a 32-province × regulation-type matrix as CSV.
@@ -157,6 +238,15 @@ npc-law-db/
 pip install -r requirements.txt
 ```
 
+Optional: some older regulations use the `.doc` format and require system tools:
+
+```bash
+# macOS
+brew install antiword catdoc
+# Debian/Ubuntu
+apt-get install antiword catdoc
+```
+
 ### Quick Start
 
 ```bash
@@ -166,48 +256,110 @@ python scripts/download.py --search "taxi" --size 100
 # Exact search: good when you know the regulation name
 python scripts/download.py --search "Property Management Regulations" --exact --size 100
 
+# Search inside full text of laws
+python scripts/download.py --search "liquidated damages" --range content --size 50
+
+# Only currently effective laws
+python scripts/download.py --search "taxi" --status 3 --size 50
+
 # Export signed download URLs only (cloud-agent friendly)
 python scripts/download.py --search "taxi" --urls-only --size 100 > urls.json
 
 # Download a single regulation
 python scripts/download.py --download <bbbs_id> --format docx output.doc
 
-# Extract a single article (parse DOCX locally, return only the target article)
-python scripts/article.py 217 "Civil Code"
+# Preview law structure (numbering pattern, first 20 articles)
+python scripts/download.py --preview <bbbs_id>
 
-# Extract multiple articles
-python scripts/article.py 51,211,347 "Civil Code" --json
+# Query an article by number (supports Chinese / Arabic / number-only)
+python scripts/download.py --article <bbbs_id> "第三十八条"
+
+# Grep keyword inside one law
+python scripts/download.py --article <bbbs_id> --grep "经济补偿"
+
+# Article-level keyword search across laws
+python scripts/article_search.py "liquidated damages" --max-laws 5 --context 1
 
 # View metadata
 python scripts/download.py --info <bbbs_id>
+
+# Check cache status
+python scripts/download.py --cache-stats
 ```
 
-### Extract Single / Multiple Articles
+### Query Single / Multiple Articles
 
-When you only need to verify one or a few articles, there's no need to load the full regulation into the agent context. `scripts/article.py` downloads the regulation DOCX and extracts only the requested articles locally, with 1 neighbouring article on each side by default:
+When you only need to verify an article or grep a keyword inside one law, there's no need to load the full regulation into the agent context.
 
 ```bash
-# Single article
-python scripts/article.py 217 "Civil Code"
+# Preview structure
+python scripts/download.py --preview <bbbs_id>
 
-# Multiple articles (comma-separated)
-python scripts/article.py 51,211,347 "Civil Code"
+# Query by article number (auto-converts Chinese/Arabic numerals)
+python scripts/download.py --article <bbbs_id> "第三十八条"
+python scripts/download.py --article <bbbs_id> "第38条"
+python scripts/download.py --article <bbbs_id> "38"
 
-# JSON output
-python scripts/article.py 217 "Civil Code" --json
-
-# Only the target article, no context
-python scripts/article.py 217 "Civil Code" --context 0
-
-# Keep the downloaded DOCX
-python scripts/article.py 217 "Civil Code" --keep-docx civil_code.docx
+# Grep keyword across articles of one law
+python scripts/download.py --article <bbbs_id> --grep "经济补偿"
 ```
 
-`article.py` accepts two kinds of law identifiers:
-- 32-character `bbbs_id` (hex)
-- Search keyword (uses the first search result; prints the selected title to stderr)
+### Article-Level Search Across Laws
 
-> **Note**: `article.py` first tries the most common `第X条` Chinese-numeral format. If any target article is missing, it calls the detail API once to detect the actual numbering style from the TOC (Chinese numerals / Arabic numerals / dotted list) and re-extracts.
+Use `scripts/article_search.py` to find specific articles containing a keyword across multiple laws:
+
+```bash
+# Search laws whose titles contain the keyword
+python scripts/article_search.py "liquidated damages" --max-laws 5 --context 1
+
+# Search laws whose full text contains the keyword
+python scripts/article_search.py "liquidated damages" --range content --max-laws 5
+
+# Restrict to a specific law
+python scripts/article_search.py "good faith acquisition" --law "Civil Code" --context 0
+
+# JSON output
+python scripts/article_search.py "liquidated damages" --max-laws 3 --json
+
+# Progressive batch retrieval
+python scripts/article_search.py "liquidated damages" --range content --max-laws 5
+python scripts/article_search.py "liquidated damages" --range content --max-laws 5 --offset 5
+python scripts/article_search.py "liquidated damages" --range content --max-laws 5 --resume
+```
+
+### Rate Limiting
+
+```bash
+# Auto mode (default)
+python scripts/download.py --search "taxi" --urls-only --size 100
+
+# Fixed 5 req/s
+python scripts/download.py --search "taxi" --urls-only --size 50 --rate-limit fixed
+
+# Adaptive (large tasks)
+python scripts/download.py --search "taxi" --urls-only --size 200 --rate-limit adaptive
+
+# Custom fixed rate
+python scripts/download.py --search "taxi" --urls-only --size 50 --rate-limit 3
+
+# Disable (small tasks)
+python scripts/download.py --info <bbbs_id> --rate-limit off
+```
+
+### Cache Management
+
+```bash
+# Show cache stats
+python scripts/download.py --cache-stats
+
+# Disable cache for one run
+python scripts/download.py --no-cache --info <bbbs_id>
+
+# Clear cache
+python scripts/download.py --cache-clear
+```
+
+Cache location: `~/.cache/npc-law-db/`
 
 ### Region Classification
 
@@ -247,9 +399,9 @@ npc-law-db/
 ├── README.md                     # This file
 ├── requirements.txt              # Python dependencies
 ├── scripts/
-│   ├── download.py               # Search, download, URL export
-│   ├── region_classifier.py      # Region classification & matrix
-│   └── article.py                # Single / batch article extraction
+│   ├── download.py               # Search, download, URL export, preview/article lookup
+│   ├── article_search.py         # Article-level keyword search across laws
+│   └── region_classifier.py      # Region classification & matrix
 └── references/
     ├── api_reference.md          # API endpoint & parameter reference
     ├── batch_collection.md       # 200-300 file batch collection guide

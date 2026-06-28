@@ -1,3 +1,7 @@
 requests>=2.25.0
 urllib3>=1.26.0
-python-docx>=0.8.11
+
+# Optional: for old .doc format support, install system tools:
+#   apt-get install antiword catdoc   (Linux)
+#   brew install antiword catdoc      (macOS)
+# python-docx is not required (pure stdlib ZIP+XML parsing for .docx)
