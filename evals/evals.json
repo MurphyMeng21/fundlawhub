@@ -1,0 +1,53 @@
+{
+  "skill_name": "cn-law-hub",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "帮我找所有现行有效的出租车管理条例，只要标题，不用下载全文。数据库是 flk.npc.gov.cn 那个。",
+      "expected_output": "使用 download.py 模糊搜索出租车 + --status 3，返回现行有效的出租车相关法规标题列表",
+      "assertions": [
+        {"id": "correct-script", "text": "使用 download.py 而非 article_search.py / gov_rules_crawler.py / treaty_crawler.py"},
+        {"id": "title-search", "text": "使用标题搜索而非正文全文搜索"},
+        {"id": "status-filter", "text": "过滤现行有效的法规 (--status 3 或 sxx=3)"},
+        {"id": "correct-results", "text": "搜索结果包含出租车/出租汽车相关法规标题"},
+        {"id": "no-download", "text": "仅获取标题和元数据，未下载全文DOCX/PDF"}
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "民法典第三十五条说了什么？帮我在全国人大法律法规数据库里找这条条文内容。",
+      "expected_output": "先用 download.py --search 民法典 --exact 获取 bbbs，再用 --article 第三十五条获取条文内容（关于监护人职责）",
+      "assertions": [
+        {"id": "correct-script", "text": "使用 download.py 的 --search 先找民法典 bbbs 再 --article 查条文"},
+        {"id": "exact-title", "text": "搜索民法典时使用精确标题匹配 (--exact)"},
+        {"id": "article-query", "text": "使用 --article 命令查询第三十五条"},
+        {"id": "correct-content", "text": "返回的条文内容涉及监护人职责"},
+        {"id": "single-law", "text": "仅查询民法典一部法律，未跨法律搜索"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "搜索国家规章库中关于食品安全的部门规章，导出CSV。数据库是 gov.cn 那个。",
+      "expected_output": "使用 gov_rules_crawler.py --search 食品安全 --categories 部门规章，导出 CSV/JSONL 元数据",
+      "assertions": [
+        {"id": "correct-script", "text": "使用 gov_rules_crawler.py 而非 download.py"},
+        {"id": "category-filter", "text": "指定 --categories 部门规章"},
+        {"id": "keyword-search", "text": "搜索关键词包含 食品安全"},
+        {"id": "csv-export", "text": "导出了 CSV 格式的元数据文件"},
+        {"id": "correct-results", "text": "搜索结果包含食品安全相关部门规章"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "中国签署了哪些关于气候变化的多边条约？在外交部条约数据库（treaty.mfa.gov.cn）里搜一下。",
+      "expected_output": "使用 treaty_crawler.py --collections 多边 --search 气候变化，导出条约元数据",
+      "assertions": [
+        {"id": "correct-script", "text": "使用 treaty_crawler.py 而非 download.py"},
+        {"id": "multilateral", "text": "指定 --collections 多边"},
+        {"id": "keyword-search", "text": "搜索关键词包含 气候变化"},
+        {"id": "metadata-export", "text": "导出了 JSONL/CSV 元数据文件"},
+        {"id": "correct-results", "text": "搜索结果包含气候变化相关多边条约"}
+      ]
+    }
+  ]
+}

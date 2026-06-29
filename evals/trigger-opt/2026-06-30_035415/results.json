@@ -1,0 +1,1390 @@
+{
+  "exit_reason": "max_iterations (5)",
+  "original_description": "Access and retrieve laws, regulations, rules, and treaties from three Chinese legal databases. Use when the user needs to search, browse, download, or extract Chinese legal documents from the National Laws and Regulations Database (flk.npc.gov.cn), the State Council Rules Database (gov.cn), or the Ministry of Foreign Affairs Treaty Database (treaty.mfa.gov.cn). Covers searching by title/content, filtering by status/category, pagination, sorting, batch download, single document download, and article-level keyword extraction. Supports multi-environment browser automation (Kimi native, Claude Code via kimi-bridge, Codex).",
+  "best_description": "Access and retrieve laws, regulations, rules, and treaties from three Chinese legal databases. Use when the user needs to search, browse, download, or extract Chinese legal documents from the National Laws and Regulations Database (flk.npc.gov.cn), the State Council Rules Database (gov.cn), or the Ministry of Foreign Affairs Treaty Database (treaty.mfa.gov.cn). Covers searching by title/content, filtering by status/category, pagination, sorting, batch download, single document download, and article-level keyword extraction. Supports multi-environment browser automation (Kimi native, Claude Code via kimi-bridge, Codex).",
+  "best_score": "4/8",
+  "best_train_score": "6/12",
+  "best_test_score": "4/8",
+  "final_description": "Activate when the user wants to search, retrieve, download, or export from any official PRC legal database: \u56fd\u5bb6\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93 (flk.npc.gov.cn), \u56fd\u5bb6\u89c4\u7ae0\u5e93 (gov.cn), or \u5916\u4ea4\u90e8\u6761\u7ea6\u5e93 (treaty.mfa.gov.cn). Signals include database names/URLs/shorthands paired with requests to find laws by title or keyword, check effective status (\u73b0\u884c\u6709\u6548/\u5df2\u5e9f\u6b62/\u5c1a\u672a\u751f\u6548), locate articles containing specific terms, filter or sort results, batch download, or export metadata to CSV/JSON. Not for drafting, translation, legal analysis, or general China law questions.",
+  "iterations_run": 5,
+  "holdout": 0.4,
+  "train_size": 12,
+  "test_size": 8,
+  "history": [
+    {
+      "iteration": 1,
+      "description": "Access and retrieve laws, regulations, rules, and treaties from three Chinese legal databases. Use when the user needs to search, browse, download, or extract Chinese legal documents from the National Laws and Regulations Database (flk.npc.gov.cn), the State Council Rules Database (gov.cn), or the Ministry of Foreign Affairs Treaty Database (treaty.mfa.gov.cn). Covers searching by title/content, filtering by status/category, pagination, sorting, batch download, single document download, and article-level keyword extraction. Supports multi-environment browser automation (Kimi native, Claude Code via kimi-bridge, Codex).",
+      "train_passed": 6,
+      "train_failed": 6,
+      "train_total": 12,
+      "train_results": [
+        {
+          "query": "\u5916\u4ea4\u90e8\u6761\u7ea6\u6570\u636e\u5e93\u91cc\u6709\u6ca1\u6709\u4e2d\u56fd\u7b7e\u7f72\u7684\u5173\u4e8e\u6d77\u6d0b\u73af\u5883\u4fdd\u62a4\u7684\u591a\u8fb9\u6761\u7ea6\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6309\u7b7e\u7f72\u5e74\u4efd\u6392\u4e00\u4e0b",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u8001\u677f\u8ba9\u6211\u53bb\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff08gov.cn\u90a3\u4e2a\uff09\u641c\u4e00\u4e0b\u5173\u4e8e\u98df\u54c1\u5b89\u5168\u7684\u90e8\u95e8\u89c4\u7ae0\uff0c\u9700\u8981\u5bfc\u51fa\u4e00\u4e2a\u5143\u6570\u636e\u5217\u8868\uff0c\u683c\u5f0f\u6700\u597d\u662fcsv\u6216\u8005json",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "flk\u4e0a\u641c\u8fdd\u7ea6\u91d1\uff0c\u8fd4\u56de\u4e86\u597d\u51e0\u767e\u4e2a\u7ed3\u679c\uff0c\u6211\u60f3\u5728\u8fd9\u4e9b\u6cd5\u5f8b\u7684\u6b63\u6587\u91cc\u627e\u542b\u9884\u671f\u8fdd\u7ea6\u7684\u5177\u4f53\u6761\u6b3e\uff0c\u4e0d\u662f\u627e\u6cd5\u5f8b\u6807\u9898",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u60f3\u6279\u91cf\u4e0b\u8f7dflk.npc.gov.cn\u4e0a\u6240\u6709\u5173\u4e8e\u73af\u5883\u4fdd\u62a4\u7684\u73b0\u884c\u6cd5\u5f8b\uff0c\u5927\u7ea6\u6709\u51e0\u767e\u4e2a\uff0c\u6709\u6ca1\u6709\u4ec0\u4e48\u9ad8\u6548\u7684\u65b9\u6cd5\uff1f",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5168\u56fd\u4eba\u5927\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93\u91cc\u641c\u4e00\u4e0b\u300a\u7269\u4e1a\u7ba1\u7406\u6761\u4f8b\u300b\uff0c\u786e\u8ba4\u4e00\u4e0b\u5b83\u73b0\u5728\u662f\u4e0d\u662f\u8fd8\u6709\u6548\uff0c\u5982\u679c\u73b0\u884c\u6709\u6548\u5e2e\u6211\u4e0b\u8f7d\u4e00\u4efdDOCX",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u627e\u6240\u6709\u548c\u51fa\u79df\u8f66\u8fd0\u8425\u76d1\u7ba1\u76f8\u5173\u7684\u5730\u65b9\u6027\u6cd5\u89c4\uff0c\u6570\u636e\u5e93\u662fflk.npc.gov.cn\u90a3\u4e2a\uff0c\u8981\u7b5b\u9009\u73b0\u884c\u6709\u6548\u7684\uff0c\u6700\u597d\u80fd\u4e00\u6b21\u6027\u591a\u635e\u70b9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u8d77\u8349\u4e00\u5c01\u52b3\u52a8\u4e89\u8bae\u4ef2\u88c1\u7533\u8bf7\u4e66\uff0c\u7533\u8bf7\u4eba\u5f20\u4e09\uff0c\u7406\u7531\u662f\u516c\u53f8\u62d6\u6b20\u4e09\u4e2a\u6708\u5de5\u8d44\uff0c\u683c\u5f0f\u8981\u6b63\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u8fd9\u4efd\u6570\u636e\u5408\u89c4\u62a5\u544a\u7684\u53c2\u8003\u6587\u732e\uff0c\u9700\u8981\u8f6c\u6210GB/T 7714\u683c\u5f0f\uff0c\u5927\u6982\u670920\u6761\u6587\u732e",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "GitHub\u4e0a\u6709\u6ca1\u6709\u722c\u53d6\u4e2d\u56fd\u6cd5\u5f8b\u6570\u636e\u5e93\u7684\u5f00\u6e90\u9879\u76ee\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6211\u60f3\u770b\u770b\u6709\u6ca1\u6709\u53ef\u4ee5\u76f4\u63a5\u7528\u7684\u8f6e\u5b50",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5199\u4e2aPython\u811a\u672c\uff0c\u628a\u8fd9\u4efd\u52b3\u52a8\u5408\u540cJSON\u6570\u636e\u6279\u91cf\u8f6c\u6210Excel\uff0c\u5b57\u6bb5\u6709\u6807\u9898\u3001\u53d1\u5e03\u65e5\u671f\u3001\u6587\u53f7",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u628a\u8fd9\u6bb5\u4e2d\u6587\u6cd5\u89c4\u7ffb\u8bd1\u6210\u82f1\u6587\uff1a\u7b2c\u4e09\u5341\u4e8c\u6761 \u7528\u4eba\u5355\u4f4d\u89e3\u9664\u6216\u8005\u7ec8\u6b62\u52b3\u52a8\u5408\u540c\uff0c\u5e94\u5f53\u5411\u52b3\u52a8\u8005\u652f\u4ed8\u7ecf\u6d4e\u8865\u507f\u3002",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6df1\u5733\u5e022025\u5e74GDP\u662f\u591a\u5c11\uff1f\u7ecf\u6d4e\u589e\u957f\u7387\u600e\u4e48\u6837\uff0c\u548c\u5168\u56fd\u5e73\u5747\u6c34\u5e73\u6bd4\u8f83\u4e00\u4e0b",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "test_passed": 4,
+      "test_failed": 4,
+      "test_total": 8,
+      "test_results": [
+        {
+          "query": "\u5e2e\u6211\u7528region_classifier\u628a\u8fd9\u6279\u5e7f\u4e1c\u7701\u548c\u5e7f\u5dde\u5e02\u7684\u5730\u65b9\u6027\u6cd5\u89c4\u5206\u7c7b\u4e00\u4e0b\uff0czdjgName\u5b57\u6bb5\u5f88\u4e0d\u89c4\u8303\u6709\u5f88\u591a\u53d8\u4f53",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u52b3\u52a8\u5408\u540c\u6cd5\u91cc\u6709\u6ca1\u6709\u63d0\u5230\u7ecf\u6d4e\u8865\u507f\u91d1\u7684\u6761\u6b3e\uff1f\u5e2e\u6211\u628a\u6240\u6709\u76f8\u5173\u6761\u6587\u627e\u51fa\u6765",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6c11\u6cd5\u5178\u7b2c\u4e94\u767e\u4e03\u5341\u4e03\u6761\u8bb2\u7684\u662f\u4ec0\u4e48\uff1f\u7528article_search.py\u5e2e\u6211\u76f4\u63a5\u627e\u6761\u6587\u5185\u5bb9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u67e5\u56fd\u5bb6\u5e02\u573a\u76d1\u7763\u7ba1\u7406\u603b\u5c402021\u5e74\u4ee5\u540e\u9881\u5e03\u7684\u90e8\u95e8\u89c4\u7ae0\u6e05\u5355\uff0c\u6765\u6e90\u662f\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff0c\u4e0d\u7528\u4e0b\u8f7d\u5168\u6587\uff0c\u6709\u5143\u6570\u636e\u5c31\u884c",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u9700\u8981\u4e00\u4efd\u7b26\u5408\u4e2d\u56fd\u6cd5\u5f8b\u8981\u6c42\u7684\u52b3\u52a8\u5408\u540c\u6a21\u677f\uff0c\u5305\u542b\u8bd5\u7528\u671f\u3001\u7ade\u4e1a\u7981\u6b62\u3001\u4fdd\u5bc6\u534f\u8bae\u6761\u6b3e\uff0c\u5e2e\u6211\u8d77\u8349\u4e00\u4efd",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6211\u5728\u505a\u4f01\u4e1a\u5408\u89c4\u57f9\u8bad\u8bfe\u4ef6\uff0c\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u4e2d\u56fd\u52b3\u52a8\u6cd5\u5bf9\u5458\u5de5\u89e3\u96c7\u7684\u4e3b\u8981\u9650\u5236\uff0c\u5199\u6210PPT\u8981\u70b9\u683c\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5317\u5927\u6cd5\u5b9d\u4e0a\u67e5\u4e00\u4e0b\u6570\u636e\u5b89\u5168\u9886\u57df\u7684\u6cd5\u5f8b\u6c47\u7f16\uff0cpkulaw\u7684\u8d26\u53f7\u6211\u6709\uff0c\u9700\u8981\u627e\u5230\u6700\u5168\u7684\u5408\u89c4\u6e05\u5355",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u6cd5\u9662\u88c1\u5224\u6587\u4e66\u7f51\u4e0a\u67e5\u4e00\u4e0b\u6848\u4ef6\u7f16\u53f7(2023)\u4eac01\u6c11\u7ec84592\u53f7\u7684\u5224\u51b3\u4e66\uff0c\u6211\u9700\u8981\u770b\u5224\u51b3\u7ed3\u679c",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "passed": 6,
+      "failed": 6,
+      "total": 12,
+      "results": [
+        {
+          "query": "\u5916\u4ea4\u90e8\u6761\u7ea6\u6570\u636e\u5e93\u91cc\u6709\u6ca1\u6709\u4e2d\u56fd\u7b7e\u7f72\u7684\u5173\u4e8e\u6d77\u6d0b\u73af\u5883\u4fdd\u62a4\u7684\u591a\u8fb9\u6761\u7ea6\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6309\u7b7e\u7f72\u5e74\u4efd\u6392\u4e00\u4e0b",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u8001\u677f\u8ba9\u6211\u53bb\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff08gov.cn\u90a3\u4e2a\uff09\u641c\u4e00\u4e0b\u5173\u4e8e\u98df\u54c1\u5b89\u5168\u7684\u90e8\u95e8\u89c4\u7ae0\uff0c\u9700\u8981\u5bfc\u51fa\u4e00\u4e2a\u5143\u6570\u636e\u5217\u8868\uff0c\u683c\u5f0f\u6700\u597d\u662fcsv\u6216\u8005json",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "flk\u4e0a\u641c\u8fdd\u7ea6\u91d1\uff0c\u8fd4\u56de\u4e86\u597d\u51e0\u767e\u4e2a\u7ed3\u679c\uff0c\u6211\u60f3\u5728\u8fd9\u4e9b\u6cd5\u5f8b\u7684\u6b63\u6587\u91cc\u627e\u542b\u9884\u671f\u8fdd\u7ea6\u7684\u5177\u4f53\u6761\u6b3e\uff0c\u4e0d\u662f\u627e\u6cd5\u5f8b\u6807\u9898",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u60f3\u6279\u91cf\u4e0b\u8f7dflk.npc.gov.cn\u4e0a\u6240\u6709\u5173\u4e8e\u73af\u5883\u4fdd\u62a4\u7684\u73b0\u884c\u6cd5\u5f8b\uff0c\u5927\u7ea6\u6709\u51e0\u767e\u4e2a\uff0c\u6709\u6ca1\u6709\u4ec0\u4e48\u9ad8\u6548\u7684\u65b9\u6cd5\uff1f",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5168\u56fd\u4eba\u5927\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93\u91cc\u641c\u4e00\u4e0b\u300a\u7269\u4e1a\u7ba1\u7406\u6761\u4f8b\u300b\uff0c\u786e\u8ba4\u4e00\u4e0b\u5b83\u73b0\u5728\u662f\u4e0d\u662f\u8fd8\u6709\u6548\uff0c\u5982\u679c\u73b0\u884c\u6709\u6548\u5e2e\u6211\u4e0b\u8f7d\u4e00\u4efdDOCX",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u627e\u6240\u6709\u548c\u51fa\u79df\u8f66\u8fd0\u8425\u76d1\u7ba1\u76f8\u5173\u7684\u5730\u65b9\u6027\u6cd5\u89c4\uff0c\u6570\u636e\u5e93\u662fflk.npc.gov.cn\u90a3\u4e2a\uff0c\u8981\u7b5b\u9009\u73b0\u884c\u6709\u6548\u7684\uff0c\u6700\u597d\u80fd\u4e00\u6b21\u6027\u591a\u635e\u70b9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u8d77\u8349\u4e00\u5c01\u52b3\u52a8\u4e89\u8bae\u4ef2\u88c1\u7533\u8bf7\u4e66\uff0c\u7533\u8bf7\u4eba\u5f20\u4e09\uff0c\u7406\u7531\u662f\u516c\u53f8\u62d6\u6b20\u4e09\u4e2a\u6708\u5de5\u8d44\uff0c\u683c\u5f0f\u8981\u6b63\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u8fd9\u4efd\u6570\u636e\u5408\u89c4\u62a5\u544a\u7684\u53c2\u8003\u6587\u732e\uff0c\u9700\u8981\u8f6c\u6210GB/T 7714\u683c\u5f0f\uff0c\u5927\u6982\u670920\u6761\u6587\u732e",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "GitHub\u4e0a\u6709\u6ca1\u6709\u722c\u53d6\u4e2d\u56fd\u6cd5\u5f8b\u6570\u636e\u5e93\u7684\u5f00\u6e90\u9879\u76ee\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6211\u60f3\u770b\u770b\u6709\u6ca1\u6709\u53ef\u4ee5\u76f4\u63a5\u7528\u7684\u8f6e\u5b50",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5199\u4e2aPython\u811a\u672c\uff0c\u628a\u8fd9\u4efd\u52b3\u52a8\u5408\u540cJSON\u6570\u636e\u6279\u91cf\u8f6c\u6210Excel\uff0c\u5b57\u6bb5\u6709\u6807\u9898\u3001\u53d1\u5e03\u65e5\u671f\u3001\u6587\u53f7",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u628a\u8fd9\u6bb5\u4e2d\u6587\u6cd5\u89c4\u7ffb\u8bd1\u6210\u82f1\u6587\uff1a\u7b2c\u4e09\u5341\u4e8c\u6761 \u7528\u4eba\u5355\u4f4d\u89e3\u9664\u6216\u8005\u7ec8\u6b62\u52b3\u52a8\u5408\u540c\uff0c\u5e94\u5f53\u5411\u52b3\u52a8\u8005\u652f\u4ed8\u7ecf\u6d4e\u8865\u507f\u3002",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6df1\u5733\u5e022025\u5e74GDP\u662f\u591a\u5c11\uff1f\u7ecf\u6d4e\u589e\u957f\u7387\u600e\u4e48\u6837\uff0c\u548c\u5168\u56fd\u5e73\u5747\u6c34\u5e73\u6bd4\u8f83\u4e00\u4e0b",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "description": "Use this skill when the user needs to search, verify the status of, or download Chinese legal documents from any official PRC government database: the NPC Law Database (flk.npc.gov.cn / \u56fd\u5bb6\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93), the State Council Rules Repository (gov.cn / \u56fd\u5bb6\u89c4\u7ae0\u5e93), or the MFA Treaty Database (treaty.mfa.gov.cn / \u5916\u4ea4\u90e8\u6761\u7ea6\u5e93). The user may refer to these by their URL, Chinese name, or abbreviated forms. Covers finding laws by topic or title, checking whether a regulation is still in effect, locating specific articles containing a keyword, batch downloading, and exporting metadata. Not for drafting legal documents, translating laws, or general China queries.",
+      "train_passed": 6,
+      "train_failed": 6,
+      "train_total": 12,
+      "train_results": [
+        {
+          "query": "\u5916\u4ea4\u90e8\u6761\u7ea6\u6570\u636e\u5e93\u91cc\u6709\u6ca1\u6709\u4e2d\u56fd\u7b7e\u7f72\u7684\u5173\u4e8e\u6d77\u6d0b\u73af\u5883\u4fdd\u62a4\u7684\u591a\u8fb9\u6761\u7ea6\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6309\u7b7e\u7f72\u5e74\u4efd\u6392\u4e00\u4e0b",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u8001\u677f\u8ba9\u6211\u53bb\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff08gov.cn\u90a3\u4e2a\uff09\u641c\u4e00\u4e0b\u5173\u4e8e\u98df\u54c1\u5b89\u5168\u7684\u90e8\u95e8\u89c4\u7ae0\uff0c\u9700\u8981\u5bfc\u51fa\u4e00\u4e2a\u5143\u6570\u636e\u5217\u8868\uff0c\u683c\u5f0f\u6700\u597d\u662fcsv\u6216\u8005json",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u60f3\u6279\u91cf\u4e0b\u8f7dflk.npc.gov.cn\u4e0a\u6240\u6709\u5173\u4e8e\u73af\u5883\u4fdd\u62a4\u7684\u73b0\u884c\u6cd5\u5f8b\uff0c\u5927\u7ea6\u6709\u51e0\u767e\u4e2a\uff0c\u6709\u6ca1\u6709\u4ec0\u4e48\u9ad8\u6548\u7684\u65b9\u6cd5\uff1f",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "flk\u4e0a\u641c\u8fdd\u7ea6\u91d1\uff0c\u8fd4\u56de\u4e86\u597d\u51e0\u767e\u4e2a\u7ed3\u679c\uff0c\u6211\u60f3\u5728\u8fd9\u4e9b\u6cd5\u5f8b\u7684\u6b63\u6587\u91cc\u627e\u542b\u9884\u671f\u8fdd\u7ea6\u7684\u5177\u4f53\u6761\u6b3e\uff0c\u4e0d\u662f\u627e\u6cd5\u5f8b\u6807\u9898",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5168\u56fd\u4eba\u5927\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93\u91cc\u641c\u4e00\u4e0b\u300a\u7269\u4e1a\u7ba1\u7406\u6761\u4f8b\u300b\uff0c\u786e\u8ba4\u4e00\u4e0b\u5b83\u73b0\u5728\u662f\u4e0d\u662f\u8fd8\u6709\u6548\uff0c\u5982\u679c\u73b0\u884c\u6709\u6548\u5e2e\u6211\u4e0b\u8f7d\u4e00\u4efdDOCX",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u627e\u6240\u6709\u548c\u51fa\u79df\u8f66\u8fd0\u8425\u76d1\u7ba1\u76f8\u5173\u7684\u5730\u65b9\u6027\u6cd5\u89c4\uff0c\u6570\u636e\u5e93\u662fflk.npc.gov.cn\u90a3\u4e2a\uff0c\u8981\u7b5b\u9009\u73b0\u884c\u6709\u6548\u7684\uff0c\u6700\u597d\u80fd\u4e00\u6b21\u6027\u591a\u635e\u70b9",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u8fd9\u4efd\u6570\u636e\u5408\u89c4\u62a5\u544a\u7684\u53c2\u8003\u6587\u732e\uff0c\u9700\u8981\u8f6c\u6210GB/T 7714\u683c\u5f0f\uff0c\u5927\u6982\u670920\u6761\u6587\u732e",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "GitHub\u4e0a\u6709\u6ca1\u6709\u722c\u53d6\u4e2d\u56fd\u6cd5\u5f8b\u6570\u636e\u5e93\u7684\u5f00\u6e90\u9879\u76ee\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6211\u60f3\u770b\u770b\u6709\u6ca1\u6709\u53ef\u4ee5\u76f4\u63a5\u7528\u7684\u8f6e\u5b50",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u8d77\u8349\u4e00\u5c01\u52b3\u52a8\u4e89\u8bae\u4ef2\u88c1\u7533\u8bf7\u4e66\uff0c\u7533\u8bf7\u4eba\u5f20\u4e09\uff0c\u7406\u7531\u662f\u516c\u53f8\u62d6\u6b20\u4e09\u4e2a\u6708\u5de5\u8d44\uff0c\u683c\u5f0f\u8981\u6b63\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5199\u4e2aPython\u811a\u672c\uff0c\u628a\u8fd9\u4efd\u52b3\u52a8\u5408\u540cJSON\u6570\u636e\u6279\u91cf\u8f6c\u6210Excel\uff0c\u5b57\u6bb5\u6709\u6807\u9898\u3001\u53d1\u5e03\u65e5\u671f\u3001\u6587\u53f7",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u628a\u8fd9\u6bb5\u4e2d\u6587\u6cd5\u89c4\u7ffb\u8bd1\u6210\u82f1\u6587\uff1a\u7b2c\u4e09\u5341\u4e8c\u6761 \u7528\u4eba\u5355\u4f4d\u89e3\u9664\u6216\u8005\u7ec8\u6b62\u52b3\u52a8\u5408\u540c\uff0c\u5e94\u5f53\u5411\u52b3\u52a8\u8005\u652f\u4ed8\u7ecf\u6d4e\u8865\u507f\u3002",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6df1\u5733\u5e022025\u5e74GDP\u662f\u591a\u5c11\uff1f\u7ecf\u6d4e\u589e\u957f\u7387\u600e\u4e48\u6837\uff0c\u548c\u5168\u56fd\u5e73\u5747\u6c34\u5e73\u6bd4\u8f83\u4e00\u4e0b",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "test_passed": 4,
+      "test_failed": 4,
+      "test_total": 8,
+      "test_results": [
+        {
+          "query": "\u5e2e\u6211\u7528region_classifier\u628a\u8fd9\u6279\u5e7f\u4e1c\u7701\u548c\u5e7f\u5dde\u5e02\u7684\u5730\u65b9\u6027\u6cd5\u89c4\u5206\u7c7b\u4e00\u4e0b\uff0czdjgName\u5b57\u6bb5\u5f88\u4e0d\u89c4\u8303\u6709\u5f88\u591a\u53d8\u4f53",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u52b3\u52a8\u5408\u540c\u6cd5\u91cc\u6709\u6ca1\u6709\u63d0\u5230\u7ecf\u6d4e\u8865\u507f\u91d1\u7684\u6761\u6b3e\uff1f\u5e2e\u6211\u628a\u6240\u6709\u76f8\u5173\u6761\u6587\u627e\u51fa\u6765",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6c11\u6cd5\u5178\u7b2c\u4e94\u767e\u4e03\u5341\u4e03\u6761\u8bb2\u7684\u662f\u4ec0\u4e48\uff1f\u7528article_search.py\u5e2e\u6211\u76f4\u63a5\u627e\u6761\u6587\u5185\u5bb9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u67e5\u56fd\u5bb6\u5e02\u573a\u76d1\u7763\u7ba1\u7406\u603b\u5c402021\u5e74\u4ee5\u540e\u9881\u5e03\u7684\u90e8\u95e8\u89c4\u7ae0\u6e05\u5355\uff0c\u6765\u6e90\u662f\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff0c\u4e0d\u7528\u4e0b\u8f7d\u5168\u6587\uff0c\u6709\u5143\u6570\u636e\u5c31\u884c",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u9700\u8981\u4e00\u4efd\u7b26\u5408\u4e2d\u56fd\u6cd5\u5f8b\u8981\u6c42\u7684\u52b3\u52a8\u5408\u540c\u6a21\u677f\uff0c\u5305\u542b\u8bd5\u7528\u671f\u3001\u7ade\u4e1a\u7981\u6b62\u3001\u4fdd\u5bc6\u534f\u8bae\u6761\u6b3e\uff0c\u5e2e\u6211\u8d77\u8349\u4e00\u4efd",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6211\u5728\u505a\u4f01\u4e1a\u5408\u89c4\u57f9\u8bad\u8bfe\u4ef6\uff0c\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u4e2d\u56fd\u52b3\u52a8\u6cd5\u5bf9\u5458\u5de5\u89e3\u96c7\u7684\u4e3b\u8981\u9650\u5236\uff0c\u5199\u6210PPT\u8981\u70b9\u683c\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u6cd5\u9662\u88c1\u5224\u6587\u4e66\u7f51\u4e0a\u67e5\u4e00\u4e0b\u6848\u4ef6\u7f16\u53f7(2023)\u4eac01\u6c11\u7ec84592\u53f7\u7684\u5224\u51b3\u4e66\uff0c\u6211\u9700\u8981\u770b\u5224\u51b3\u7ed3\u679c",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5317\u5927\u6cd5\u5b9d\u4e0a\u67e5\u4e00\u4e0b\u6570\u636e\u5b89\u5168\u9886\u57df\u7684\u6cd5\u5f8b\u6c47\u7f16\uff0cpkulaw\u7684\u8d26\u53f7\u6211\u6709\uff0c\u9700\u8981\u627e\u5230\u6700\u5168\u7684\u5408\u89c4\u6e05\u5355",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "passed": 6,
+      "failed": 6,
+      "total": 12,
+      "results": [
+        {
+          "query": "\u5916\u4ea4\u90e8\u6761\u7ea6\u6570\u636e\u5e93\u91cc\u6709\u6ca1\u6709\u4e2d\u56fd\u7b7e\u7f72\u7684\u5173\u4e8e\u6d77\u6d0b\u73af\u5883\u4fdd\u62a4\u7684\u591a\u8fb9\u6761\u7ea6\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6309\u7b7e\u7f72\u5e74\u4efd\u6392\u4e00\u4e0b",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u8001\u677f\u8ba9\u6211\u53bb\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff08gov.cn\u90a3\u4e2a\uff09\u641c\u4e00\u4e0b\u5173\u4e8e\u98df\u54c1\u5b89\u5168\u7684\u90e8\u95e8\u89c4\u7ae0\uff0c\u9700\u8981\u5bfc\u51fa\u4e00\u4e2a\u5143\u6570\u636e\u5217\u8868\uff0c\u683c\u5f0f\u6700\u597d\u662fcsv\u6216\u8005json",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u60f3\u6279\u91cf\u4e0b\u8f7dflk.npc.gov.cn\u4e0a\u6240\u6709\u5173\u4e8e\u73af\u5883\u4fdd\u62a4\u7684\u73b0\u884c\u6cd5\u5f8b\uff0c\u5927\u7ea6\u6709\u51e0\u767e\u4e2a\uff0c\u6709\u6ca1\u6709\u4ec0\u4e48\u9ad8\u6548\u7684\u65b9\u6cd5\uff1f",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "flk\u4e0a\u641c\u8fdd\u7ea6\u91d1\uff0c\u8fd4\u56de\u4e86\u597d\u51e0\u767e\u4e2a\u7ed3\u679c\uff0c\u6211\u60f3\u5728\u8fd9\u4e9b\u6cd5\u5f8b\u7684\u6b63\u6587\u91cc\u627e\u542b\u9884\u671f\u8fdd\u7ea6\u7684\u5177\u4f53\u6761\u6b3e\uff0c\u4e0d\u662f\u627e\u6cd5\u5f8b\u6807\u9898",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5168\u56fd\u4eba\u5927\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93\u91cc\u641c\u4e00\u4e0b\u300a\u7269\u4e1a\u7ba1\u7406\u6761\u4f8b\u300b\uff0c\u786e\u8ba4\u4e00\u4e0b\u5b83\u73b0\u5728\u662f\u4e0d\u662f\u8fd8\u6709\u6548\uff0c\u5982\u679c\u73b0\u884c\u6709\u6548\u5e2e\u6211\u4e0b\u8f7d\u4e00\u4efdDOCX",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u627e\u6240\u6709\u548c\u51fa\u79df\u8f66\u8fd0\u8425\u76d1\u7ba1\u76f8\u5173\u7684\u5730\u65b9\u6027\u6cd5\u89c4\uff0c\u6570\u636e\u5e93\u662fflk.npc.gov.cn\u90a3\u4e2a\uff0c\u8981\u7b5b\u9009\u73b0\u884c\u6709\u6548\u7684\uff0c\u6700\u597d\u80fd\u4e00\u6b21\u6027\u591a\u635e\u70b9",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u8fd9\u4efd\u6570\u636e\u5408\u89c4\u62a5\u544a\u7684\u53c2\u8003\u6587\u732e\uff0c\u9700\u8981\u8f6c\u6210GB/T 7714\u683c\u5f0f\uff0c\u5927\u6982\u670920\u6761\u6587\u732e",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "GitHub\u4e0a\u6709\u6ca1\u6709\u722c\u53d6\u4e2d\u56fd\u6cd5\u5f8b\u6570\u636e\u5e93\u7684\u5f00\u6e90\u9879\u76ee\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6211\u60f3\u770b\u770b\u6709\u6ca1\u6709\u53ef\u4ee5\u76f4\u63a5\u7528\u7684\u8f6e\u5b50",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u8d77\u8349\u4e00\u5c01\u52b3\u52a8\u4e89\u8bae\u4ef2\u88c1\u7533\u8bf7\u4e66\uff0c\u7533\u8bf7\u4eba\u5f20\u4e09\uff0c\u7406\u7531\u662f\u516c\u53f8\u62d6\u6b20\u4e09\u4e2a\u6708\u5de5\u8d44\uff0c\u683c\u5f0f\u8981\u6b63\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5199\u4e2aPython\u811a\u672c\uff0c\u628a\u8fd9\u4efd\u52b3\u52a8\u5408\u540cJSON\u6570\u636e\u6279\u91cf\u8f6c\u6210Excel\uff0c\u5b57\u6bb5\u6709\u6807\u9898\u3001\u53d1\u5e03\u65e5\u671f\u3001\u6587\u53f7",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u628a\u8fd9\u6bb5\u4e2d\u6587\u6cd5\u89c4\u7ffb\u8bd1\u6210\u82f1\u6587\uff1a\u7b2c\u4e09\u5341\u4e8c\u6761 \u7528\u4eba\u5355\u4f4d\u89e3\u9664\u6216\u8005\u7ec8\u6b62\u52b3\u52a8\u5408\u540c\uff0c\u5e94\u5f53\u5411\u52b3\u52a8\u8005\u652f\u4ed8\u7ecf\u6d4e\u8865\u507f\u3002",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6df1\u5733\u5e022025\u5e74GDP\u662f\u591a\u5c11\uff1f\u7ecf\u6d4e\u589e\u957f\u7387\u600e\u4e48\u6837\uff0c\u548c\u5168\u56fd\u5e73\u5747\u6c34\u5e73\u6bd4\u8f83\u4e00\u4e0b",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "iteration": 3,
+      "description": "Use this skill when the user's intent involves the \u56fd\u5bb6\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93 (flk.npc.gov.cn), \u56fd\u5bb6\u89c4\u7ae0\u5e93 (gov.cn), or \u5916\u4ea4\u90e8\u6761\u7ea6\u5e93 (treaty.mfa.gov.cn) \u2014 searching, downloading, verifying, or extracting Chinese legal documents from these official PRC sources. Covers: exact title or topic search, filtering by \u73b0\u884c\u6709\u6548/\u5df2\u5e9f\u6b62/\u5c1a\u672a\u751f\u6548, checking if a regulation is still effective, finding specific \u6761\u6b3e/articles containing keywords within law bodies, sorting and paginating results, batch/bulk downloads, and exporting metadata. NOT for: drafting legal documents, translation, or general China queries.",
+      "train_passed": 6,
+      "train_failed": 6,
+      "train_total": 12,
+      "train_results": [
+        {
+          "query": "\u5916\u4ea4\u90e8\u6761\u7ea6\u6570\u636e\u5e93\u91cc\u6709\u6ca1\u6709\u4e2d\u56fd\u7b7e\u7f72\u7684\u5173\u4e8e\u6d77\u6d0b\u73af\u5883\u4fdd\u62a4\u7684\u591a\u8fb9\u6761\u7ea6\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6309\u7b7e\u7f72\u5e74\u4efd\u6392\u4e00\u4e0b",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u8001\u677f\u8ba9\u6211\u53bb\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff08gov.cn\u90a3\u4e2a\uff09\u641c\u4e00\u4e0b\u5173\u4e8e\u98df\u54c1\u5b89\u5168\u7684\u90e8\u95e8\u89c4\u7ae0\uff0c\u9700\u8981\u5bfc\u51fa\u4e00\u4e2a\u5143\u6570\u636e\u5217\u8868\uff0c\u683c\u5f0f\u6700\u597d\u662fcsv\u6216\u8005json",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u60f3\u6279\u91cf\u4e0b\u8f7dflk.npc.gov.cn\u4e0a\u6240\u6709\u5173\u4e8e\u73af\u5883\u4fdd\u62a4\u7684\u73b0\u884c\u6cd5\u5f8b\uff0c\u5927\u7ea6\u6709\u51e0\u767e\u4e2a\uff0c\u6709\u6ca1\u6709\u4ec0\u4e48\u9ad8\u6548\u7684\u65b9\u6cd5\uff1f",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "flk\u4e0a\u641c\u8fdd\u7ea6\u91d1\uff0c\u8fd4\u56de\u4e86\u597d\u51e0\u767e\u4e2a\u7ed3\u679c\uff0c\u6211\u60f3\u5728\u8fd9\u4e9b\u6cd5\u5f8b\u7684\u6b63\u6587\u91cc\u627e\u542b\u9884\u671f\u8fdd\u7ea6\u7684\u5177\u4f53\u6761\u6b3e\uff0c\u4e0d\u662f\u627e\u6cd5\u5f8b\u6807\u9898",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5168\u56fd\u4eba\u5927\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93\u91cc\u641c\u4e00\u4e0b\u300a\u7269\u4e1a\u7ba1\u7406\u6761\u4f8b\u300b\uff0c\u786e\u8ba4\u4e00\u4e0b\u5b83\u73b0\u5728\u662f\u4e0d\u662f\u8fd8\u6709\u6548\uff0c\u5982\u679c\u73b0\u884c\u6709\u6548\u5e2e\u6211\u4e0b\u8f7d\u4e00\u4efdDOCX",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u627e\u6240\u6709\u548c\u51fa\u79df\u8f66\u8fd0\u8425\u76d1\u7ba1\u76f8\u5173\u7684\u5730\u65b9\u6027\u6cd5\u89c4\uff0c\u6570\u636e\u5e93\u662fflk.npc.gov.cn\u90a3\u4e2a\uff0c\u8981\u7b5b\u9009\u73b0\u884c\u6709\u6548\u7684\uff0c\u6700\u597d\u80fd\u4e00\u6b21\u6027\u591a\u635e\u70b9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u8fd9\u4efd\u6570\u636e\u5408\u89c4\u62a5\u544a\u7684\u53c2\u8003\u6587\u732e\uff0c\u9700\u8981\u8f6c\u6210GB/T 7714\u683c\u5f0f\uff0c\u5927\u6982\u670920\u6761\u6587\u732e",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "GitHub\u4e0a\u6709\u6ca1\u6709\u722c\u53d6\u4e2d\u56fd\u6cd5\u5f8b\u6570\u636e\u5e93\u7684\u5f00\u6e90\u9879\u76ee\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6211\u60f3\u770b\u770b\u6709\u6ca1\u6709\u53ef\u4ee5\u76f4\u63a5\u7528\u7684\u8f6e\u5b50",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u8d77\u8349\u4e00\u5c01\u52b3\u52a8\u4e89\u8bae\u4ef2\u88c1\u7533\u8bf7\u4e66\uff0c\u7533\u8bf7\u4eba\u5f20\u4e09\uff0c\u7406\u7531\u662f\u516c\u53f8\u62d6\u6b20\u4e09\u4e2a\u6708\u5de5\u8d44\uff0c\u683c\u5f0f\u8981\u6b63\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5199\u4e2aPython\u811a\u672c\uff0c\u628a\u8fd9\u4efd\u52b3\u52a8\u5408\u540cJSON\u6570\u636e\u6279\u91cf\u8f6c\u6210Excel\uff0c\u5b57\u6bb5\u6709\u6807\u9898\u3001\u53d1\u5e03\u65e5\u671f\u3001\u6587\u53f7",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u628a\u8fd9\u6bb5\u4e2d\u6587\u6cd5\u89c4\u7ffb\u8bd1\u6210\u82f1\u6587\uff1a\u7b2c\u4e09\u5341\u4e8c\u6761 \u7528\u4eba\u5355\u4f4d\u89e3\u9664\u6216\u8005\u7ec8\u6b62\u52b3\u52a8\u5408\u540c\uff0c\u5e94\u5f53\u5411\u52b3\u52a8\u8005\u652f\u4ed8\u7ecf\u6d4e\u8865\u507f\u3002",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6df1\u5733\u5e022025\u5e74GDP\u662f\u591a\u5c11\uff1f\u7ecf\u6d4e\u589e\u957f\u7387\u600e\u4e48\u6837\uff0c\u548c\u5168\u56fd\u5e73\u5747\u6c34\u5e73\u6bd4\u8f83\u4e00\u4e0b",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "test_passed": 4,
+      "test_failed": 4,
+      "test_total": 8,
+      "test_results": [
+        {
+          "query": "\u5e2e\u6211\u7528region_classifier\u628a\u8fd9\u6279\u5e7f\u4e1c\u7701\u548c\u5e7f\u5dde\u5e02\u7684\u5730\u65b9\u6027\u6cd5\u89c4\u5206\u7c7b\u4e00\u4e0b\uff0czdjgName\u5b57\u6bb5\u5f88\u4e0d\u89c4\u8303\u6709\u5f88\u591a\u53d8\u4f53",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u52b3\u52a8\u5408\u540c\u6cd5\u91cc\u6709\u6ca1\u6709\u63d0\u5230\u7ecf\u6d4e\u8865\u507f\u91d1\u7684\u6761\u6b3e\uff1f\u5e2e\u6211\u628a\u6240\u6709\u76f8\u5173\u6761\u6587\u627e\u51fa\u6765",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6c11\u6cd5\u5178\u7b2c\u4e94\u767e\u4e03\u5341\u4e03\u6761\u8bb2\u7684\u662f\u4ec0\u4e48\uff1f\u7528article_search.py\u5e2e\u6211\u76f4\u63a5\u627e\u6761\u6587\u5185\u5bb9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u67e5\u56fd\u5bb6\u5e02\u573a\u76d1\u7763\u7ba1\u7406\u603b\u5c402021\u5e74\u4ee5\u540e\u9881\u5e03\u7684\u90e8\u95e8\u89c4\u7ae0\u6e05\u5355\uff0c\u6765\u6e90\u662f\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff0c\u4e0d\u7528\u4e0b\u8f7d\u5168\u6587\uff0c\u6709\u5143\u6570\u636e\u5c31\u884c",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u9700\u8981\u4e00\u4efd\u7b26\u5408\u4e2d\u56fd\u6cd5\u5f8b\u8981\u6c42\u7684\u52b3\u52a8\u5408\u540c\u6a21\u677f\uff0c\u5305\u542b\u8bd5\u7528\u671f\u3001\u7ade\u4e1a\u7981\u6b62\u3001\u4fdd\u5bc6\u534f\u8bae\u6761\u6b3e\uff0c\u5e2e\u6211\u8d77\u8349\u4e00\u4efd",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u6cd5\u9662\u88c1\u5224\u6587\u4e66\u7f51\u4e0a\u67e5\u4e00\u4e0b\u6848\u4ef6\u7f16\u53f7(2023)\u4eac01\u6c11\u7ec84592\u53f7\u7684\u5224\u51b3\u4e66\uff0c\u6211\u9700\u8981\u770b\u5224\u51b3\u7ed3\u679c",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5317\u5927\u6cd5\u5b9d\u4e0a\u67e5\u4e00\u4e0b\u6570\u636e\u5b89\u5168\u9886\u57df\u7684\u6cd5\u5f8b\u6c47\u7f16\uff0cpkulaw\u7684\u8d26\u53f7\u6211\u6709\uff0c\u9700\u8981\u627e\u5230\u6700\u5168\u7684\u5408\u89c4\u6e05\u5355",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6211\u5728\u505a\u4f01\u4e1a\u5408\u89c4\u57f9\u8bad\u8bfe\u4ef6\uff0c\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u4e2d\u56fd\u52b3\u52a8\u6cd5\u5bf9\u5458\u5de5\u89e3\u96c7\u7684\u4e3b\u8981\u9650\u5236\uff0c\u5199\u6210PPT\u8981\u70b9\u683c\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "passed": 6,
+      "failed": 6,
+      "total": 12,
+      "results": [
+        {
+          "query": "\u5916\u4ea4\u90e8\u6761\u7ea6\u6570\u636e\u5e93\u91cc\u6709\u6ca1\u6709\u4e2d\u56fd\u7b7e\u7f72\u7684\u5173\u4e8e\u6d77\u6d0b\u73af\u5883\u4fdd\u62a4\u7684\u591a\u8fb9\u6761\u7ea6\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6309\u7b7e\u7f72\u5e74\u4efd\u6392\u4e00\u4e0b",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u8001\u677f\u8ba9\u6211\u53bb\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff08gov.cn\u90a3\u4e2a\uff09\u641c\u4e00\u4e0b\u5173\u4e8e\u98df\u54c1\u5b89\u5168\u7684\u90e8\u95e8\u89c4\u7ae0\uff0c\u9700\u8981\u5bfc\u51fa\u4e00\u4e2a\u5143\u6570\u636e\u5217\u8868\uff0c\u683c\u5f0f\u6700\u597d\u662fcsv\u6216\u8005json",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u60f3\u6279\u91cf\u4e0b\u8f7dflk.npc.gov.cn\u4e0a\u6240\u6709\u5173\u4e8e\u73af\u5883\u4fdd\u62a4\u7684\u73b0\u884c\u6cd5\u5f8b\uff0c\u5927\u7ea6\u6709\u51e0\u767e\u4e2a\uff0c\u6709\u6ca1\u6709\u4ec0\u4e48\u9ad8\u6548\u7684\u65b9\u6cd5\uff1f",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "flk\u4e0a\u641c\u8fdd\u7ea6\u91d1\uff0c\u8fd4\u56de\u4e86\u597d\u51e0\u767e\u4e2a\u7ed3\u679c\uff0c\u6211\u60f3\u5728\u8fd9\u4e9b\u6cd5\u5f8b\u7684\u6b63\u6587\u91cc\u627e\u542b\u9884\u671f\u8fdd\u7ea6\u7684\u5177\u4f53\u6761\u6b3e\uff0c\u4e0d\u662f\u627e\u6cd5\u5f8b\u6807\u9898",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5168\u56fd\u4eba\u5927\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93\u91cc\u641c\u4e00\u4e0b\u300a\u7269\u4e1a\u7ba1\u7406\u6761\u4f8b\u300b\uff0c\u786e\u8ba4\u4e00\u4e0b\u5b83\u73b0\u5728\u662f\u4e0d\u662f\u8fd8\u6709\u6548\uff0c\u5982\u679c\u73b0\u884c\u6709\u6548\u5e2e\u6211\u4e0b\u8f7d\u4e00\u4efdDOCX",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u627e\u6240\u6709\u548c\u51fa\u79df\u8f66\u8fd0\u8425\u76d1\u7ba1\u76f8\u5173\u7684\u5730\u65b9\u6027\u6cd5\u89c4\uff0c\u6570\u636e\u5e93\u662fflk.npc.gov.cn\u90a3\u4e2a\uff0c\u8981\u7b5b\u9009\u73b0\u884c\u6709\u6548\u7684\uff0c\u6700\u597d\u80fd\u4e00\u6b21\u6027\u591a\u635e\u70b9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u8fd9\u4efd\u6570\u636e\u5408\u89c4\u62a5\u544a\u7684\u53c2\u8003\u6587\u732e\uff0c\u9700\u8981\u8f6c\u6210GB/T 7714\u683c\u5f0f\uff0c\u5927\u6982\u670920\u6761\u6587\u732e",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "GitHub\u4e0a\u6709\u6ca1\u6709\u722c\u53d6\u4e2d\u56fd\u6cd5\u5f8b\u6570\u636e\u5e93\u7684\u5f00\u6e90\u9879\u76ee\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6211\u60f3\u770b\u770b\u6709\u6ca1\u6709\u53ef\u4ee5\u76f4\u63a5\u7528\u7684\u8f6e\u5b50",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u8d77\u8349\u4e00\u5c01\u52b3\u52a8\u4e89\u8bae\u4ef2\u88c1\u7533\u8bf7\u4e66\uff0c\u7533\u8bf7\u4eba\u5f20\u4e09\uff0c\u7406\u7531\u662f\u516c\u53f8\u62d6\u6b20\u4e09\u4e2a\u6708\u5de5\u8d44\uff0c\u683c\u5f0f\u8981\u6b63\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5199\u4e2aPython\u811a\u672c\uff0c\u628a\u8fd9\u4efd\u52b3\u52a8\u5408\u540cJSON\u6570\u636e\u6279\u91cf\u8f6c\u6210Excel\uff0c\u5b57\u6bb5\u6709\u6807\u9898\u3001\u53d1\u5e03\u65e5\u671f\u3001\u6587\u53f7",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u628a\u8fd9\u6bb5\u4e2d\u6587\u6cd5\u89c4\u7ffb\u8bd1\u6210\u82f1\u6587\uff1a\u7b2c\u4e09\u5341\u4e8c\u6761 \u7528\u4eba\u5355\u4f4d\u89e3\u9664\u6216\u8005\u7ec8\u6b62\u52b3\u52a8\u5408\u540c\uff0c\u5e94\u5f53\u5411\u52b3\u52a8\u8005\u652f\u4ed8\u7ecf\u6d4e\u8865\u507f\u3002",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6df1\u5733\u5e022025\u5e74GDP\u662f\u591a\u5c11\uff1f\u7ecf\u6d4e\u589e\u957f\u7387\u600e\u4e48\u6837\uff0c\u548c\u5168\u56fd\u5e73\u5747\u6c34\u5e73\u6bd4\u8f83\u4e00\u4e0b",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "iteration": 4,
+      "description": "Use this skill when the user references any official PRC legal database \u2014 \u56fd\u5bb6\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93 (flk.npc.gov.cn), \u56fd\u5bb6\u89c4\u7ae0\u5e93 (gov.cn), or \u5916\u4ea4\u90e8\u6761\u7ea6\u5e93 (treaty.mfa.gov.cn) \u2014 by name, URL, or shorthand (\u5168\u56fd\u4eba\u5927\u6570\u636e\u5e93, \u89c4\u7ae0\u5e93, \u6761\u7ea6\u5e93, flk). Covers: searching laws by title or topic, checking effective status (\u73b0\u884c\u6709\u6548/\u5df2\u5e9f\u6b62/\u5c1a\u672a\u751f\u6548), finding specific articles/\u6761\u6b3e containing keywords within law text, filtering by region/authority/status, sorting results, batch/bulk downloading documents, and exporting metadata. NOT for: drafting legal documents, translation, legal analysis, or general questions about Chinese law.",
+      "train_passed": 6,
+      "train_failed": 6,
+      "train_total": 12,
+      "train_results": [
+        {
+          "query": "\u6211\u60f3\u6279\u91cf\u4e0b\u8f7dflk.npc.gov.cn\u4e0a\u6240\u6709\u5173\u4e8e\u73af\u5883\u4fdd\u62a4\u7684\u73b0\u884c\u6cd5\u5f8b\uff0c\u5927\u7ea6\u6709\u51e0\u767e\u4e2a\uff0c\u6709\u6ca1\u6709\u4ec0\u4e48\u9ad8\u6548\u7684\u65b9\u6cd5\uff1f",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "flk\u4e0a\u641c\u8fdd\u7ea6\u91d1\uff0c\u8fd4\u56de\u4e86\u597d\u51e0\u767e\u4e2a\u7ed3\u679c\uff0c\u6211\u60f3\u5728\u8fd9\u4e9b\u6cd5\u5f8b\u7684\u6b63\u6587\u91cc\u627e\u542b\u9884\u671f\u8fdd\u7ea6\u7684\u5177\u4f53\u6761\u6b3e\uff0c\u4e0d\u662f\u627e\u6cd5\u5f8b\u6807\u9898",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5916\u4ea4\u90e8\u6761\u7ea6\u6570\u636e\u5e93\u91cc\u6709\u6ca1\u6709\u4e2d\u56fd\u7b7e\u7f72\u7684\u5173\u4e8e\u6d77\u6d0b\u73af\u5883\u4fdd\u62a4\u7684\u591a\u8fb9\u6761\u7ea6\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6309\u7b7e\u7f72\u5e74\u4efd\u6392\u4e00\u4e0b",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u8001\u677f\u8ba9\u6211\u53bb\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff08gov.cn\u90a3\u4e2a\uff09\u641c\u4e00\u4e0b\u5173\u4e8e\u98df\u54c1\u5b89\u5168\u7684\u90e8\u95e8\u89c4\u7ae0\uff0c\u9700\u8981\u5bfc\u51fa\u4e00\u4e2a\u5143\u6570\u636e\u5217\u8868\uff0c\u683c\u5f0f\u6700\u597d\u662fcsv\u6216\u8005json",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5168\u56fd\u4eba\u5927\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93\u91cc\u641c\u4e00\u4e0b\u300a\u7269\u4e1a\u7ba1\u7406\u6761\u4f8b\u300b\uff0c\u786e\u8ba4\u4e00\u4e0b\u5b83\u73b0\u5728\u662f\u4e0d\u662f\u8fd8\u6709\u6548\uff0c\u5982\u679c\u73b0\u884c\u6709\u6548\u5e2e\u6211\u4e0b\u8f7d\u4e00\u4efdDOCX",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u627e\u6240\u6709\u548c\u51fa\u79df\u8f66\u8fd0\u8425\u76d1\u7ba1\u76f8\u5173\u7684\u5730\u65b9\u6027\u6cd5\u89c4\uff0c\u6570\u636e\u5e93\u662fflk.npc.gov.cn\u90a3\u4e2a\uff0c\u8981\u7b5b\u9009\u73b0\u884c\u6709\u6548\u7684\uff0c\u6700\u597d\u80fd\u4e00\u6b21\u6027\u591a\u635e\u70b9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u8d77\u8349\u4e00\u5c01\u52b3\u52a8\u4e89\u8bae\u4ef2\u88c1\u7533\u8bf7\u4e66\uff0c\u7533\u8bf7\u4eba\u5f20\u4e09\uff0c\u7406\u7531\u662f\u516c\u53f8\u62d6\u6b20\u4e09\u4e2a\u6708\u5de5\u8d44\uff0c\u683c\u5f0f\u8981\u6b63\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u8fd9\u4efd\u6570\u636e\u5408\u89c4\u62a5\u544a\u7684\u53c2\u8003\u6587\u732e\uff0c\u9700\u8981\u8f6c\u6210GB/T 7714\u683c\u5f0f\uff0c\u5927\u6982\u670920\u6761\u6587\u732e",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "GitHub\u4e0a\u6709\u6ca1\u6709\u722c\u53d6\u4e2d\u56fd\u6cd5\u5f8b\u6570\u636e\u5e93\u7684\u5f00\u6e90\u9879\u76ee\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6211\u60f3\u770b\u770b\u6709\u6ca1\u6709\u53ef\u4ee5\u76f4\u63a5\u7528\u7684\u8f6e\u5b50",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5199\u4e2aPython\u811a\u672c\uff0c\u628a\u8fd9\u4efd\u52b3\u52a8\u5408\u540cJSON\u6570\u636e\u6279\u91cf\u8f6c\u6210Excel\uff0c\u5b57\u6bb5\u6709\u6807\u9898\u3001\u53d1\u5e03\u65e5\u671f\u3001\u6587\u53f7",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u628a\u8fd9\u6bb5\u4e2d\u6587\u6cd5\u89c4\u7ffb\u8bd1\u6210\u82f1\u6587\uff1a\u7b2c\u4e09\u5341\u4e8c\u6761 \u7528\u4eba\u5355\u4f4d\u89e3\u9664\u6216\u8005\u7ec8\u6b62\u52b3\u52a8\u5408\u540c\uff0c\u5e94\u5f53\u5411\u52b3\u52a8\u8005\u652f\u4ed8\u7ecf\u6d4e\u8865\u507f\u3002",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6df1\u5733\u5e022025\u5e74GDP\u662f\u591a\u5c11\uff1f\u7ecf\u6d4e\u589e\u957f\u7387\u600e\u4e48\u6837\uff0c\u548c\u5168\u56fd\u5e73\u5747\u6c34\u5e73\u6bd4\u8f83\u4e00\u4e0b",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "test_passed": 4,
+      "test_failed": 4,
+      "test_total": 8,
+      "test_results": [
+        {
+          "query": "\u5e2e\u6211\u7528region_classifier\u628a\u8fd9\u6279\u5e7f\u4e1c\u7701\u548c\u5e7f\u5dde\u5e02\u7684\u5730\u65b9\u6027\u6cd5\u89c4\u5206\u7c7b\u4e00\u4e0b\uff0czdjgName\u5b57\u6bb5\u5f88\u4e0d\u89c4\u8303\u6709\u5f88\u591a\u53d8\u4f53",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u52b3\u52a8\u5408\u540c\u6cd5\u91cc\u6709\u6ca1\u6709\u63d0\u5230\u7ecf\u6d4e\u8865\u507f\u91d1\u7684\u6761\u6b3e\uff1f\u5e2e\u6211\u628a\u6240\u6709\u76f8\u5173\u6761\u6587\u627e\u51fa\u6765",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6c11\u6cd5\u5178\u7b2c\u4e94\u767e\u4e03\u5341\u4e03\u6761\u8bb2\u7684\u662f\u4ec0\u4e48\uff1f\u7528article_search.py\u5e2e\u6211\u76f4\u63a5\u627e\u6761\u6587\u5185\u5bb9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u67e5\u56fd\u5bb6\u5e02\u573a\u76d1\u7763\u7ba1\u7406\u603b\u5c402021\u5e74\u4ee5\u540e\u9881\u5e03\u7684\u90e8\u95e8\u89c4\u7ae0\u6e05\u5355\uff0c\u6765\u6e90\u662f\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff0c\u4e0d\u7528\u4e0b\u8f7d\u5168\u6587\uff0c\u6709\u5143\u6570\u636e\u5c31\u884c",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u9700\u8981\u4e00\u4efd\u7b26\u5408\u4e2d\u56fd\u6cd5\u5f8b\u8981\u6c42\u7684\u52b3\u52a8\u5408\u540c\u6a21\u677f\uff0c\u5305\u542b\u8bd5\u7528\u671f\u3001\u7ade\u4e1a\u7981\u6b62\u3001\u4fdd\u5bc6\u534f\u8bae\u6761\u6b3e\uff0c\u5e2e\u6211\u8d77\u8349\u4e00\u4efd",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6211\u5728\u505a\u4f01\u4e1a\u5408\u89c4\u57f9\u8bad\u8bfe\u4ef6\uff0c\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u4e2d\u56fd\u52b3\u52a8\u6cd5\u5bf9\u5458\u5de5\u89e3\u96c7\u7684\u4e3b\u8981\u9650\u5236\uff0c\u5199\u6210PPT\u8981\u70b9\u683c\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5317\u5927\u6cd5\u5b9d\u4e0a\u67e5\u4e00\u4e0b\u6570\u636e\u5b89\u5168\u9886\u57df\u7684\u6cd5\u5f8b\u6c47\u7f16\uff0cpkulaw\u7684\u8d26\u53f7\u6211\u6709\uff0c\u9700\u8981\u627e\u5230\u6700\u5168\u7684\u5408\u89c4\u6e05\u5355",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u6cd5\u9662\u88c1\u5224\u6587\u4e66\u7f51\u4e0a\u67e5\u4e00\u4e0b\u6848\u4ef6\u7f16\u53f7(2023)\u4eac01\u6c11\u7ec84592\u53f7\u7684\u5224\u51b3\u4e66\uff0c\u6211\u9700\u8981\u770b\u5224\u51b3\u7ed3\u679c",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "passed": 6,
+      "failed": 6,
+      "total": 12,
+      "results": [
+        {
+          "query": "\u6211\u60f3\u6279\u91cf\u4e0b\u8f7dflk.npc.gov.cn\u4e0a\u6240\u6709\u5173\u4e8e\u73af\u5883\u4fdd\u62a4\u7684\u73b0\u884c\u6cd5\u5f8b\uff0c\u5927\u7ea6\u6709\u51e0\u767e\u4e2a\uff0c\u6709\u6ca1\u6709\u4ec0\u4e48\u9ad8\u6548\u7684\u65b9\u6cd5\uff1f",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "flk\u4e0a\u641c\u8fdd\u7ea6\u91d1\uff0c\u8fd4\u56de\u4e86\u597d\u51e0\u767e\u4e2a\u7ed3\u679c\uff0c\u6211\u60f3\u5728\u8fd9\u4e9b\u6cd5\u5f8b\u7684\u6b63\u6587\u91cc\u627e\u542b\u9884\u671f\u8fdd\u7ea6\u7684\u5177\u4f53\u6761\u6b3e\uff0c\u4e0d\u662f\u627e\u6cd5\u5f8b\u6807\u9898",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5916\u4ea4\u90e8\u6761\u7ea6\u6570\u636e\u5e93\u91cc\u6709\u6ca1\u6709\u4e2d\u56fd\u7b7e\u7f72\u7684\u5173\u4e8e\u6d77\u6d0b\u73af\u5883\u4fdd\u62a4\u7684\u591a\u8fb9\u6761\u7ea6\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6309\u7b7e\u7f72\u5e74\u4efd\u6392\u4e00\u4e0b",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u8001\u677f\u8ba9\u6211\u53bb\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff08gov.cn\u90a3\u4e2a\uff09\u641c\u4e00\u4e0b\u5173\u4e8e\u98df\u54c1\u5b89\u5168\u7684\u90e8\u95e8\u89c4\u7ae0\uff0c\u9700\u8981\u5bfc\u51fa\u4e00\u4e2a\u5143\u6570\u636e\u5217\u8868\uff0c\u683c\u5f0f\u6700\u597d\u662fcsv\u6216\u8005json",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5168\u56fd\u4eba\u5927\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93\u91cc\u641c\u4e00\u4e0b\u300a\u7269\u4e1a\u7ba1\u7406\u6761\u4f8b\u300b\uff0c\u786e\u8ba4\u4e00\u4e0b\u5b83\u73b0\u5728\u662f\u4e0d\u662f\u8fd8\u6709\u6548\uff0c\u5982\u679c\u73b0\u884c\u6709\u6548\u5e2e\u6211\u4e0b\u8f7d\u4e00\u4efdDOCX",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u627e\u6240\u6709\u548c\u51fa\u79df\u8f66\u8fd0\u8425\u76d1\u7ba1\u76f8\u5173\u7684\u5730\u65b9\u6027\u6cd5\u89c4\uff0c\u6570\u636e\u5e93\u662fflk.npc.gov.cn\u90a3\u4e2a\uff0c\u8981\u7b5b\u9009\u73b0\u884c\u6709\u6548\u7684\uff0c\u6700\u597d\u80fd\u4e00\u6b21\u6027\u591a\u635e\u70b9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u8d77\u8349\u4e00\u5c01\u52b3\u52a8\u4e89\u8bae\u4ef2\u88c1\u7533\u8bf7\u4e66\uff0c\u7533\u8bf7\u4eba\u5f20\u4e09\uff0c\u7406\u7531\u662f\u516c\u53f8\u62d6\u6b20\u4e09\u4e2a\u6708\u5de5\u8d44\uff0c\u683c\u5f0f\u8981\u6b63\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u8fd9\u4efd\u6570\u636e\u5408\u89c4\u62a5\u544a\u7684\u53c2\u8003\u6587\u732e\uff0c\u9700\u8981\u8f6c\u6210GB/T 7714\u683c\u5f0f\uff0c\u5927\u6982\u670920\u6761\u6587\u732e",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "GitHub\u4e0a\u6709\u6ca1\u6709\u722c\u53d6\u4e2d\u56fd\u6cd5\u5f8b\u6570\u636e\u5e93\u7684\u5f00\u6e90\u9879\u76ee\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6211\u60f3\u770b\u770b\u6709\u6ca1\u6709\u53ef\u4ee5\u76f4\u63a5\u7528\u7684\u8f6e\u5b50",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5199\u4e2aPython\u811a\u672c\uff0c\u628a\u8fd9\u4efd\u52b3\u52a8\u5408\u540cJSON\u6570\u636e\u6279\u91cf\u8f6c\u6210Excel\uff0c\u5b57\u6bb5\u6709\u6807\u9898\u3001\u53d1\u5e03\u65e5\u671f\u3001\u6587\u53f7",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u628a\u8fd9\u6bb5\u4e2d\u6587\u6cd5\u89c4\u7ffb\u8bd1\u6210\u82f1\u6587\uff1a\u7b2c\u4e09\u5341\u4e8c\u6761 \u7528\u4eba\u5355\u4f4d\u89e3\u9664\u6216\u8005\u7ec8\u6b62\u52b3\u52a8\u5408\u540c\uff0c\u5e94\u5f53\u5411\u52b3\u52a8\u8005\u652f\u4ed8\u7ecf\u6d4e\u8865\u507f\u3002",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6df1\u5733\u5e022025\u5e74GDP\u662f\u591a\u5c11\uff1f\u7ecf\u6d4e\u589e\u957f\u7387\u600e\u4e48\u6837\uff0c\u548c\u5168\u56fd\u5e73\u5747\u6c34\u5e73\u6bd4\u8f83\u4e00\u4e0b",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "iteration": 5,
+      "description": "Activate when the user wants to search, retrieve, download, or export from any official PRC legal database: \u56fd\u5bb6\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93 (flk.npc.gov.cn), \u56fd\u5bb6\u89c4\u7ae0\u5e93 (gov.cn), or \u5916\u4ea4\u90e8\u6761\u7ea6\u5e93 (treaty.mfa.gov.cn). Signals include database names/URLs/shorthands paired with requests to find laws by title or keyword, check effective status (\u73b0\u884c\u6709\u6548/\u5df2\u5e9f\u6b62/\u5c1a\u672a\u751f\u6548), locate articles containing specific terms, filter or sort results, batch download, or export metadata to CSV/JSON. Not for drafting, translation, legal analysis, or general China law questions.",
+      "train_passed": 6,
+      "train_failed": 6,
+      "train_total": 12,
+      "train_results": [
+        {
+          "query": "\u6211\u8001\u677f\u8ba9\u6211\u53bb\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff08gov.cn\u90a3\u4e2a\uff09\u641c\u4e00\u4e0b\u5173\u4e8e\u98df\u54c1\u5b89\u5168\u7684\u90e8\u95e8\u89c4\u7ae0\uff0c\u9700\u8981\u5bfc\u51fa\u4e00\u4e2a\u5143\u6570\u636e\u5217\u8868\uff0c\u683c\u5f0f\u6700\u597d\u662fcsv\u6216\u8005json",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5916\u4ea4\u90e8\u6761\u7ea6\u6570\u636e\u5e93\u91cc\u6709\u6ca1\u6709\u4e2d\u56fd\u7b7e\u7f72\u7684\u5173\u4e8e\u6d77\u6d0b\u73af\u5883\u4fdd\u62a4\u7684\u591a\u8fb9\u6761\u7ea6\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6309\u7b7e\u7f72\u5e74\u4efd\u6392\u4e00\u4e0b",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u60f3\u6279\u91cf\u4e0b\u8f7dflk.npc.gov.cn\u4e0a\u6240\u6709\u5173\u4e8e\u73af\u5883\u4fdd\u62a4\u7684\u73b0\u884c\u6cd5\u5f8b\uff0c\u5927\u7ea6\u6709\u51e0\u767e\u4e2a\uff0c\u6709\u6ca1\u6709\u4ec0\u4e48\u9ad8\u6548\u7684\u65b9\u6cd5\uff1f",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "flk\u4e0a\u641c\u8fdd\u7ea6\u91d1\uff0c\u8fd4\u56de\u4e86\u597d\u51e0\u767e\u4e2a\u7ed3\u679c\uff0c\u6211\u60f3\u5728\u8fd9\u4e9b\u6cd5\u5f8b\u7684\u6b63\u6587\u91cc\u627e\u542b\u9884\u671f\u8fdd\u7ea6\u7684\u5177\u4f53\u6761\u6b3e\uff0c\u4e0d\u662f\u627e\u6cd5\u5f8b\u6807\u9898",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5168\u56fd\u4eba\u5927\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93\u91cc\u641c\u4e00\u4e0b\u300a\u7269\u4e1a\u7ba1\u7406\u6761\u4f8b\u300b\uff0c\u786e\u8ba4\u4e00\u4e0b\u5b83\u73b0\u5728\u662f\u4e0d\u662f\u8fd8\u6709\u6548\uff0c\u5982\u679c\u73b0\u884c\u6709\u6548\u5e2e\u6211\u4e0b\u8f7d\u4e00\u4efdDOCX",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u627e\u6240\u6709\u548c\u51fa\u79df\u8f66\u8fd0\u8425\u76d1\u7ba1\u76f8\u5173\u7684\u5730\u65b9\u6027\u6cd5\u89c4\uff0c\u6570\u636e\u5e93\u662fflk.npc.gov.cn\u90a3\u4e2a\uff0c\u8981\u7b5b\u9009\u73b0\u884c\u6709\u6548\u7684\uff0c\u6700\u597d\u80fd\u4e00\u6b21\u6027\u591a\u635e\u70b9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u8d77\u8349\u4e00\u5c01\u52b3\u52a8\u4e89\u8bae\u4ef2\u88c1\u7533\u8bf7\u4e66\uff0c\u7533\u8bf7\u4eba\u5f20\u4e09\uff0c\u7406\u7531\u662f\u516c\u53f8\u62d6\u6b20\u4e09\u4e2a\u6708\u5de5\u8d44\uff0c\u683c\u5f0f\u8981\u6b63\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u8fd9\u4efd\u6570\u636e\u5408\u89c4\u62a5\u544a\u7684\u53c2\u8003\u6587\u732e\uff0c\u9700\u8981\u8f6c\u6210GB/T 7714\u683c\u5f0f\uff0c\u5927\u6982\u670920\u6761\u6587\u732e",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "GitHub\u4e0a\u6709\u6ca1\u6709\u722c\u53d6\u4e2d\u56fd\u6cd5\u5f8b\u6570\u636e\u5e93\u7684\u5f00\u6e90\u9879\u76ee\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6211\u60f3\u770b\u770b\u6709\u6ca1\u6709\u53ef\u4ee5\u76f4\u63a5\u7528\u7684\u8f6e\u5b50",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5199\u4e2aPython\u811a\u672c\uff0c\u628a\u8fd9\u4efd\u52b3\u52a8\u5408\u540cJSON\u6570\u636e\u6279\u91cf\u8f6c\u6210Excel\uff0c\u5b57\u6bb5\u6709\u6807\u9898\u3001\u53d1\u5e03\u65e5\u671f\u3001\u6587\u53f7",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u628a\u8fd9\u6bb5\u4e2d\u6587\u6cd5\u89c4\u7ffb\u8bd1\u6210\u82f1\u6587\uff1a\u7b2c\u4e09\u5341\u4e8c\u6761 \u7528\u4eba\u5355\u4f4d\u89e3\u9664\u6216\u8005\u7ec8\u6b62\u52b3\u52a8\u5408\u540c\uff0c\u5e94\u5f53\u5411\u52b3\u52a8\u8005\u652f\u4ed8\u7ecf\u6d4e\u8865\u507f\u3002",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6df1\u5733\u5e022025\u5e74GDP\u662f\u591a\u5c11\uff1f\u7ecf\u6d4e\u589e\u957f\u7387\u600e\u4e48\u6837\uff0c\u548c\u5168\u56fd\u5e73\u5747\u6c34\u5e73\u6bd4\u8f83\u4e00\u4e0b",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "test_passed": 4,
+      "test_failed": 4,
+      "test_total": 8,
+      "test_results": [
+        {
+          "query": "\u5e2e\u6211\u7528region_classifier\u628a\u8fd9\u6279\u5e7f\u4e1c\u7701\u548c\u5e7f\u5dde\u5e02\u7684\u5730\u65b9\u6027\u6cd5\u89c4\u5206\u7c7b\u4e00\u4e0b\uff0czdjgName\u5b57\u6bb5\u5f88\u4e0d\u89c4\u8303\u6709\u5f88\u591a\u53d8\u4f53",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u52b3\u52a8\u5408\u540c\u6cd5\u91cc\u6709\u6ca1\u6709\u63d0\u5230\u7ecf\u6d4e\u8865\u507f\u91d1\u7684\u6761\u6b3e\uff1f\u5e2e\u6211\u628a\u6240\u6709\u76f8\u5173\u6761\u6587\u627e\u51fa\u6765",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6c11\u6cd5\u5178\u7b2c\u4e94\u767e\u4e03\u5341\u4e03\u6761\u8bb2\u7684\u662f\u4ec0\u4e48\uff1f\u7528article_search.py\u5e2e\u6211\u76f4\u63a5\u627e\u6761\u6587\u5185\u5bb9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u67e5\u56fd\u5bb6\u5e02\u573a\u76d1\u7763\u7ba1\u7406\u603b\u5c402021\u5e74\u4ee5\u540e\u9881\u5e03\u7684\u90e8\u95e8\u89c4\u7ae0\u6e05\u5355\uff0c\u6765\u6e90\u662f\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff0c\u4e0d\u7528\u4e0b\u8f7d\u5168\u6587\uff0c\u6709\u5143\u6570\u636e\u5c31\u884c",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u9700\u8981\u4e00\u4efd\u7b26\u5408\u4e2d\u56fd\u6cd5\u5f8b\u8981\u6c42\u7684\u52b3\u52a8\u5408\u540c\u6a21\u677f\uff0c\u5305\u542b\u8bd5\u7528\u671f\u3001\u7ade\u4e1a\u7981\u6b62\u3001\u4fdd\u5bc6\u534f\u8bae\u6761\u6b3e\uff0c\u5e2e\u6211\u8d77\u8349\u4e00\u4efd",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6211\u5728\u505a\u4f01\u4e1a\u5408\u89c4\u57f9\u8bad\u8bfe\u4ef6\uff0c\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u4e2d\u56fd\u52b3\u52a8\u6cd5\u5bf9\u5458\u5de5\u89e3\u96c7\u7684\u4e3b\u8981\u9650\u5236\uff0c\u5199\u6210PPT\u8981\u70b9\u683c\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5317\u5927\u6cd5\u5b9d\u4e0a\u67e5\u4e00\u4e0b\u6570\u636e\u5b89\u5168\u9886\u57df\u7684\u6cd5\u5f8b\u6c47\u7f16\uff0cpkulaw\u7684\u8d26\u53f7\u6211\u6709\uff0c\u9700\u8981\u627e\u5230\u6700\u5168\u7684\u5408\u89c4\u6e05\u5355",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u6cd5\u9662\u88c1\u5224\u6587\u4e66\u7f51\u4e0a\u67e5\u4e00\u4e0b\u6848\u4ef6\u7f16\u53f7(2023)\u4eac01\u6c11\u7ec84592\u53f7\u7684\u5224\u51b3\u4e66\uff0c\u6211\u9700\u8981\u770b\u5224\u51b3\u7ed3\u679c",
+          "should_trigger": false,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": true
+        }
+      ],
+      "passed": 6,
+      "failed": 6,
+      "total": 12,
+      "results": [
+        {
+          "query": "\u6211\u8001\u677f\u8ba9\u6211\u53bb\u56fd\u5bb6\u89c4\u7ae0\u5e93\uff08gov.cn\u90a3\u4e2a\uff09\u641c\u4e00\u4e0b\u5173\u4e8e\u98df\u54c1\u5b89\u5168\u7684\u90e8\u95e8\u89c4\u7ae0\uff0c\u9700\u8981\u5bfc\u51fa\u4e00\u4e2a\u5143\u6570\u636e\u5217\u8868\uff0c\u683c\u5f0f\u6700\u597d\u662fcsv\u6216\u8005json",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5916\u4ea4\u90e8\u6761\u7ea6\u6570\u636e\u5e93\u91cc\u6709\u6ca1\u6709\u4e2d\u56fd\u7b7e\u7f72\u7684\u5173\u4e8e\u6d77\u6d0b\u73af\u5883\u4fdd\u62a4\u7684\u591a\u8fb9\u6761\u7ea6\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6309\u7b7e\u7f72\u5e74\u4efd\u6392\u4e00\u4e0b",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u60f3\u6279\u91cf\u4e0b\u8f7dflk.npc.gov.cn\u4e0a\u6240\u6709\u5173\u4e8e\u73af\u5883\u4fdd\u62a4\u7684\u73b0\u884c\u6cd5\u5f8b\uff0c\u5927\u7ea6\u6709\u51e0\u767e\u4e2a\uff0c\u6709\u6ca1\u6709\u4ec0\u4e48\u9ad8\u6548\u7684\u65b9\u6cd5\uff1f",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "flk\u4e0a\u641c\u8fdd\u7ea6\u91d1\uff0c\u8fd4\u56de\u4e86\u597d\u51e0\u767e\u4e2a\u7ed3\u679c\uff0c\u6211\u60f3\u5728\u8fd9\u4e9b\u6cd5\u5f8b\u7684\u6b63\u6587\u91cc\u627e\u542b\u9884\u671f\u8fdd\u7ea6\u7684\u5177\u4f53\u6761\u6b3e\uff0c\u4e0d\u662f\u627e\u6cd5\u5f8b\u6807\u9898",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u5728\u5168\u56fd\u4eba\u5927\u6cd5\u5f8b\u6cd5\u89c4\u6570\u636e\u5e93\u91cc\u641c\u4e00\u4e0b\u300a\u7269\u4e1a\u7ba1\u7406\u6761\u4f8b\u300b\uff0c\u786e\u8ba4\u4e00\u4e0b\u5b83\u73b0\u5728\u662f\u4e0d\u662f\u8fd8\u6709\u6548\uff0c\u5982\u679c\u73b0\u884c\u6709\u6548\u5e2e\u6211\u4e0b\u8f7d\u4e00\u4efdDOCX",
+          "should_trigger": true,
+          "trigger_rate": 0.3333333333333333,
+          "triggers": 1,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u6211\u9700\u8981\u627e\u6240\u6709\u548c\u51fa\u79df\u8f66\u8fd0\u8425\u76d1\u7ba1\u76f8\u5173\u7684\u5730\u65b9\u6027\u6cd5\u89c4\uff0c\u6570\u636e\u5e93\u662fflk.npc.gov.cn\u90a3\u4e2a\uff0c\u8981\u7b5b\u9009\u73b0\u884c\u6709\u6548\u7684\uff0c\u6700\u597d\u80fd\u4e00\u6b21\u6027\u591a\u635e\u70b9",
+          "should_trigger": true,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": false
+        },
+        {
+          "query": "\u5e2e\u6211\u8d77\u8349\u4e00\u5c01\u52b3\u52a8\u4e89\u8bae\u4ef2\u88c1\u7533\u8bf7\u4e66\uff0c\u7533\u8bf7\u4eba\u5f20\u4e09\uff0c\u7406\u7531\u662f\u516c\u53f8\u62d6\u6b20\u4e09\u4e2a\u6708\u5de5\u8d44\uff0c\u683c\u5f0f\u8981\u6b63\u5f0f",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u6574\u7406\u4e00\u4e0b\u8fd9\u4efd\u6570\u636e\u5408\u89c4\u62a5\u544a\u7684\u53c2\u8003\u6587\u732e\uff0c\u9700\u8981\u8f6c\u6210GB/T 7714\u683c\u5f0f\uff0c\u5927\u6982\u670920\u6761\u6587\u732e",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "GitHub\u4e0a\u6709\u6ca1\u6709\u722c\u53d6\u4e2d\u56fd\u6cd5\u5f8b\u6570\u636e\u5e93\u7684\u5f00\u6e90\u9879\u76ee\uff1f\u5e2e\u6211\u641c\u4e00\u4e0b\uff0c\u6211\u60f3\u770b\u770b\u6709\u6ca1\u6709\u53ef\u4ee5\u76f4\u63a5\u7528\u7684\u8f6e\u5b50",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u5199\u4e2aPython\u811a\u672c\uff0c\u628a\u8fd9\u4efd\u52b3\u52a8\u5408\u540cJSON\u6570\u636e\u6279\u91cf\u8f6c\u6210Excel\uff0c\u5b57\u6bb5\u6709\u6807\u9898\u3001\u53d1\u5e03\u65e5\u671f\u3001\u6587\u53f7",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u5e2e\u6211\u628a\u8fd9\u6bb5\u4e2d\u6587\u6cd5\u89c4\u7ffb\u8bd1\u6210\u82f1\u6587\uff1a\u7b2c\u4e09\u5341\u4e8c\u6761 \u7528\u4eba\u5355\u4f4d\u89e3\u9664\u6216\u8005\u7ec8\u6b62\u52b3\u52a8\u5408\u540c\uff0c\u5e94\u5f53\u5411\u52b3\u52a8\u8005\u652f\u4ed8\u7ecf\u6d4e\u8865\u507f\u3002",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        },
+        {
+          "query": "\u6df1\u5733\u5e022025\u5e74GDP\u662f\u591a\u5c11\uff1f\u7ecf\u6d4e\u589e\u957f\u7387\u600e\u4e48\u6837\uff0c\u548c\u5168\u56fd\u5e73\u5747\u6c34\u5e73\u6bd4\u8f83\u4e00\u4e0b",
+          "should_trigger": false,
+          "trigger_rate": 0.0,
+          "triggers": 0,
+          "runs": 3,
+          "pass": true
+        }
+      ]
+    }
+  ]
+}
