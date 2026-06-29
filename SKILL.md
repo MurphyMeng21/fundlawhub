@@ -1,7 +1,17 @@
 ---
 name: npc-law-db
-description: Access and retrieve laws/regulations from China's National Laws and Regulations Database (flk.npc.gov.cn). Use when the user needs to search, browse, download, or extract Chinese legal documents including constitutional laws, statutes, administrative regulations, local regulations, judicial interpretations, and supervisory regulations. Covers searching by title/content, advanced filtering by category/issuing authority/effective status/date ranges, pagination, sorting, batch download, single document download, and article-level keyword extraction. Supports multi-environment browser automation (Kimi native, Claude Code via kimi-bridge, Codex).
+description: Access and retrieve laws, regulations, rules, and treaties from three Chinese legal databases. Use when the user needs to search, browse, download, or extract Chinese legal documents from the National Laws and Regulations Database (flk.npc.gov.cn), the State Council Rules Database (gov.cn), or the Ministry of Foreign Affairs Treaty Database (treaty.mfa.gov.cn). Covers searching by title/content, filtering by status/category, pagination, sorting, batch download, single document download, and article-level keyword extraction. Supports multi-environment browser automation (Kimi native, Claude Code via kimi-bridge, Codex).
 ---
+
+# Legal Databases Overview
+
+This skill supports three legal databases:
+
+| Database | Script | Source | Data type | Auth |
+|----------|--------|--------|-----------|------|
+| **国家法律法规数据库 (NPC)** | `scripts/download.py` | `flk.npc.gov.cn` | JSON API | None |
+| **国家规章库 (Gov Rules)** | `scripts/gov_rules_crawler.py` | `gov.cn/zhengce/xxgk/gjgzk` | Athena API + HTML | Dynamic RSA |
+| **外交条约库 (Treaty)** | `scripts/treaty_crawler.py` | `treaty.mfa.gov.cn` | HTML scraping | None |
 
 # National Laws and Regulations Database (国家法律法规数据库)
 
@@ -384,3 +394,145 @@ Visit `/advanceSearch`. Supports:
 ## Pagination
 
 Page sizes: 10/20/30/40/50/100 per page. Use 100 for fastest bulk ID collection.
+
+---
+
+## State Council Rules Database (国家规章库)
+
+Official database: `https://www.gov.cn/zhengce/xxgk/gjgzk/`. Maintained by the State Council.
+
+### Quick Start
+
+```bash
+# Search department rules
+python scripts/gov_rules_crawler.py --search "管理办法" --categories 部门规章 --size 20
+
+# Search local government rules
+python scripts/gov_rules_crawler.py --search "物业管理" --categories 地方政府规章 --size 20
+
+# Get metadata for a specific page
+python scripts/gov_rules_crawler.py --info "https://www.gov.cn/zhengce/202606/content_7073180.htm"
+
+# Download full pages and attachments
+python scripts/gov_rules_crawler.py --categories 部门规章 --size 10 --download
+```
+
+### Output
+
+Each run creates a directory per category under the output root:
+
+```
+gov_rules_output/
+├── summary.json
+├── logs/
+└── 部门规章/
+    ├── metadata.jsonl
+    ├── metadata.csv
+    ├── stats_report.json
+    ├── stats_report.md
+    ├── summary.json
+    └── files/
+        └── {rule_title}/
+            ├── page.html
+            ├── page.txt
+            └── attachments...
+```
+
+### Notes
+
+- The Athena API requires dynamic RSA authentication discovered from the frontend JS bundle.
+- Auth parameters may expire during long runs; restart if you receive 401/403.
+- Read `references/gov_rules_api_reference.md` for the full auth and API field mapping.
+
+---
+
+## Ministry of Foreign Affairs Treaty Database (外交条约库)
+
+Official database: `https://treaty.mfa.gov.cn/web/`. Maintained by the Ministry of Foreign Affairs.
+
+### Quick Start
+
+```bash
+# Search bilateral treaties
+python scripts/treaty_crawler.py --collections 双边 --search "上海合作组织" --size 20
+
+# Search multilateral treaties
+python scripts/treaty_crawler.py --collections 多边 --search "人权" --size 20
+
+# Get metadata for a specific treaty page
+python scripts/treaty_crawler.py --info "https://treaty.mfa.gov.cn/web/detail1.jsp?objid=1531876373617"
+
+# Download treaty preview PDFs
+python scripts/treaty_crawler.py --collections 双边 --size 5 --download
+```
+
+### Output
+
+Each run creates a directory per collection under the output root:
+
+```
+treaty_output/
+├── summary.json
+├── logs/
+└── 双边/
+    ├── metadata.jsonl
+    ├── metadata.csv
+    ├── stats_report.json
+    ├── stats_report.md
+    ├── summary.json
+    └── files/
+        └── {treaty_title}_{collection}/
+            └── {preview_pdfs}
+```
+
+### Notes
+
+- This is a pure HTML site; parsing relies on BeautifulSoup.
+- Collections: `全部` (all), `双边` (bilateral), `多边` (multilateral).
+- Read `references/treaty_api_reference.md` for HTML structure and field extraction patterns.
+
+---
+
+## Shared Infrastructure
+
+All three scripts share `scripts/common.py` for:
+
+- **Caching**: file-based JSON/binary cache with TTL, namespace-isolated per database
+  - NPC: `~/.cache/npc-law-db/`
+  - Gov Rules: `~/.cache/npc-law-db-govrules/`
+  - Treaty: `~/.cache/npc-law-db-treaty/`
+- **Rate limiting**: global singleton, auto mode picks OFF/FIXED/ADAPTIVE by estimated request count
+- **HTTP client**: unified retry, 429 backoff, SSL toggle via `NPC_LAW_VERIFY_SSL`
+- **File I/O**: JSON/CSV/JSONL/markdown helpers
+- **Text utilities**: HTML tag stripping, filename sanitization, year extraction
+- **Chinese numerals**: article number conversion for NPC article lookup
+
+### Cache management per script
+
+```bash
+# Each script supports --no-cache
+python scripts/treaty_crawler.py --search "人权" --no-cache
+```
+
+### Rate limiting per script
+
+```bash
+# Small task: no throttle
+python scripts/gov_rules_crawler.py --info "..." --rate-limit off
+
+# Large task: adaptive
+python scripts/treaty_crawler.py --collections 全部 --size 200 --rate-limit adaptive
+```
+
+---
+
+## Script Reference Summary
+
+| Script | Purpose | Key CLI | Output |
+|--------|---------|---------|--------|
+| `scripts/download.py` | NPC laws/regulations | `--search`, `--info`, `--download`, `--preview`, `--article`, `--urls-only` | stdout, files |
+| `scripts/article_search.py` | Article-level search across NPC laws | `keyword`, `--law`, `--range`, `--max-laws`, `--context`, `--json` | stdout |
+| `scripts/gov_rules_crawler.py` | Gov.cn rules database | `--search`, `--categories`, `--size`, `--download`, `--info` | `gov_rules_output/` |
+| `scripts/treaty_crawler.py` | MFA treaty database | `--search`, `--collections`, `--size`, `--download`, `--info` | `treaty_output/` |
+| `scripts/region_classifier.py` | Province/city classification | `--classify`, `--matrix` | JSON/CSV |
+

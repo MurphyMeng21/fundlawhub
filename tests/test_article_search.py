@@ -12,7 +12,7 @@ import article_search as art_search
 
 
 class TestSearchArticles(unittest.TestCase):
-    @mock.patch("article_search._extract_paragraphs_from_docx")
+    @mock.patch("article_search.extract_paragraphs_from_docx")
     @mock.patch("article_search._cache")
     @mock.patch("article_search._request")
     @mock.patch("article_search.get_download_url")
@@ -40,11 +40,11 @@ class TestSearchArticles(unittest.TestCase):
         match_nums = [a["article_num"] for a in results[0]["articles"] if a["is_match"]]
         self.assertEqual(match_nums, ["第二条"])
 
-    @mock.patch("article_search._extract_paragraphs_from_docx")
+    @mock.patch("article_search.extract_paragraphs_from_docx")
     @mock.patch("article_search._cache")
     @mock.patch("article_search._request")
-    @mock.patch("article_search.get_download_url")
-    @mock.patch("article_search.search_laws")
+    @mock.patch("download.get_download_url")
+    @mock.patch("download.search_laws")
     def test_context(self, mock_search, mock_get_url, mock_request, mock_cache, mock_extract):
         mock_search.return_value = {
             "code": 200,
@@ -64,11 +64,11 @@ class TestSearchArticles(unittest.TestCase):
         nums = [a["article_num"] for a in results[0]["articles"]]
         self.assertEqual(nums, ["第一条", "第二条", "第三条"])
 
-    @mock.patch("article_search._extract_paragraphs_from_docx")
+    @mock.patch("article_search.extract_paragraphs_from_docx")
     @mock.patch("article_search._cache")
     @mock.patch("article_search._request")
-    @mock.patch("article_search.get_download_url")
-    @mock.patch("article_search.search_laws")
+    @mock.patch("download.get_download_url")
+    @mock.patch("download.search_laws")
     def test_max_laws_limit(self, mock_search, mock_get_url, mock_request, mock_cache, mock_extract):
         mock_search.return_value = {
             "code": 200,

@@ -31,11 +31,16 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from download import (
-    search_laws, get_download_url, _request, _cache,
-    _extract_paragraphs_from_docx, _split_into_articles,
-    _is_article_line, sxx_to_str,
+from common import (
+    _CacheManager,
+    extract_paragraphs_from_docx,
+    get_cache,
+    http_request as _request,
+    split_into_articles,
 )
+from download import search_laws, get_download_url, sxx_to_str
+
+_cache = get_cache("npc-law-db")
 
 
 def search_articles(keyword: str, law_keyword: str = None,
@@ -110,8 +115,8 @@ def search_articles(keyword: str, law_keyword: str = None,
                 continue
 
         try:
-            paragraphs = _extract_paragraphs_from_docx(docx_bytes)
-            articles = _split_into_articles(paragraphs)
+            paragraphs = extract_paragraphs_from_docx(docx_bytes)
+            articles = split_into_articles(paragraphs)
 
             matched_indices = set()
             for i, (num, text) in enumerate(articles):
@@ -244,9 +249,8 @@ def main():
     args = parser.parse_args()
 
     if args.no_cache:
-        from download import _CacheManager
         global _cache
-        _cache = _CacheManager(enabled=False)
+        _cache = _CacheManager(enabled=False, namespace="npc-law-db")
 
     status_filter = None
     if args.status:

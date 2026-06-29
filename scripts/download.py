@@ -35,41 +35,40 @@ Examples:
 """
 
 import argparse
-import hashlib
 import json
 import os
-import random
 import re
-import subprocess
 import sys
-import time
-import zipfile
-from dataclasses import dataclass
-from enum import Enum, auto
-from io import BytesIO
 from pathlib import Path
-from typing import Optional
-from xml.etree import ElementTree as ET
 
-import requests
-import urllib3
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from common import (
+    _CacheManager,
+    _RateLimitConfig,
+    _RateLimitMode,
+    _SmartRateLimiter,
+    _backoff,
+    chinese_to_int as _chinese_to_int,
+    ensure_dir,
+    extract_article_number as _extract_article_number,
+    extract_paragraphs_from_docx as _extract_paragraphs_from_docx,
+    get_cache,
+    http_request,
+    init_limiter,
+    int_to_chinese as _int_to_chinese,
+    is_article_line as _is_article_line,
+    match_article_query as _match_article_query,
+    split_into_articles as _split_into_articles,
+)
 
 BASE_URL = "https://flk.npc.gov.cn"
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 npc-law-db/1.0"
+    ),
     "Referer": "https://flk.npc.gov.cn/",
     "Accept": "application/json, text/plain, */*",
 }
-VERIFY_SSL = os.getenv("NPC_LAW_VERIFY_SSL", "0") == "1"
-NO_CACHE = os.getenv("NPC_LAW_NO_CACHE", "0") == "1"
-MAX_RETRIES = 4
-BASE_BACKOFF = 1.0
-MAX_BACKOFF = 30.0
-
-# Retryable HTTP status codes
-RETRYABLE_STATUS_CODES = {408, 429, 500, 502, 503, 504}
 
 _SXX_MAP = {1: "已废止", 2: "已修改", 3: "现行有效", 4: "尚未生效"}
 
@@ -78,373 +77,19 @@ def sxx_to_str(code: int) -> str:
     return _SXX_MAP.get(code, f"未知({code})")
 
 
-def _backoff(attempt: int) -> float:
-    """Exponential backoff with jitter to prevent thundering herd."""
-    exp = min(BASE_BACKOFF * (2 ** (attempt - 1)), MAX_BACKOFF)
-    jitter = random.uniform(0, exp * 0.3)
-    return max(0.1, exp + jitter)
+# Backward-compatible re-exports for tests and article_search.py
+_cache = get_cache("npc-law-db")
 
 
-# ---------------------------------------------------------------------------
-# Cache manager
-# ---------------------------------------------------------------------------
-
-class _CacheManager:
-    def __init__(self, enabled: bool = True):
-        self.enabled = enabled and not NO_CACHE
-        self.dir = Path.home() / ".cache" / "npc-law-db"
-        if self.enabled:
-            self.dir.mkdir(parents=True, exist_ok=True)
-
-    def _key(self, *parts: str) -> str:
-        raw = "|".join(parts)
-        return hashlib.sha256(raw.encode()).hexdigest()[:16]
-
-    def _path(self, key: str, suffix: str = ".json") -> Path:
-        return self.dir / f"{key}{suffix}"
-
-    def get(self, key: str, max_age: float = 3600):
-        if not self.enabled:
-            return None
-        path = self._path(key)
-        if not path.exists():
-            return None
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-            if time.time() - data.get("_cached_at", 0) > max_age:
-                return None
-            return data.get("payload")
-        except Exception:
-            return None
-
-    def set(self, key: str, payload: dict) -> None:
-        if not self.enabled:
-            return
-        try:
-            self._path(key).write_text(
-                json.dumps({"_cached_at": time.time(), "payload": payload}, ensure_ascii=False),
-                encoding="utf-8",
-            )
-        except Exception:
-            pass
-
-    def get_file(self, key: str, max_age: float = 604800) -> bytes | None:
-        if not self.enabled:
-            return None
-        path = self._path(key, ".bin")
-        meta_path = self._path(key, ".meta")
-        if not path.exists() or not meta_path.exists():
-            return None
-        try:
-            meta = json.loads(meta_path.read_text(encoding="utf-8"))
-            if time.time() - meta.get("cached_at", 0) > max_age:
-                return None
-            return path.read_bytes()
-        except Exception:
-            return None
-
-    def set_file(self, key: str, data: bytes) -> None:
-        if not self.enabled:
-            return
-        try:
-            self._path(key, ".bin").write_bytes(data)
-            self._path(key, ".meta").write_text(
-                json.dumps({"cached_at": time.time()}), encoding="utf-8"
-            )
-        except Exception:
-            pass
-
-    def clear(self) -> None:
-        import shutil
-        if self.dir.exists():
-            shutil.rmtree(self.dir)
-            self.dir.mkdir(parents=True, exist_ok=True)
-
-    def stats(self) -> dict:
-        if not self.dir.exists():
-            return {"entries": 0, "size_kb": 0}
-        entries = list(self.dir.iterdir())
-        total_size = sum(f.stat().st_size for f in entries if f.is_file())
-        return {"entries": len(entries) // 2, "size_kb": round(total_size / 1024, 1)}
-
-
-_cache = _CacheManager()
-
-
-# ---------------------------------------------------------------------------
-# Smart rate limiter
-# ---------------------------------------------------------------------------
-
-class _RateLimitMode(Enum):
-    AUTO = auto()
-    OFF = auto()
-    FIXED = auto()
-    ADAPTIVE = auto()
-
-
-@dataclass
-class _RateLimitConfig:
-    fixed_rps: float = 5.0
-    adaptive_initial_rps: float = 5.0
-    adaptive_min_rps: float = 1.0
-    adaptive_max_rps: float = 8.0
-    small_task_threshold: int = 10
-    large_task_threshold: int = 100
-
-
-class _SmartRateLimiter:
-    """Task-size-aware rate limiter: no throttle for small tasks, auto-throttle for large."""
-
-    def __init__(self, config: Optional[_RateLimitConfig] = None):
-        self.cfg = config or _RateLimitConfig()
-        self.mode: _RateLimitMode = _RateLimitMode.OFF
-        self._current_rps: float = self.cfg.adaptive_initial_rps
-        self._consecutive_success: int = 0
-        self._consecutive_429: int = 0
-        self._last_request_time: float = 0
-        self._total_requests: int = 0
-        self._limited_requests: int = 0
-        self._start_time: Optional[float] = None
-        self._429_count: int = 0
-
-    @staticmethod
-    def estimate_task_size(**kwargs) -> int:
-        """Estimate number of HTTP requests a task will generate."""
-        total = 0
-        if kwargs.get("search"):
-            pages = max(1, (kwargs.get("size", 20) + 99) // 100)
-            total += pages
-            if kwargs.get("urls_only"):
-                avg_per_page = min(100, kwargs.get("size", 20))
-                total += pages * avg_per_page
-        if "download_list" in kwargs:
-            total += len(kwargs["download_list"])
-        if "info_list" in kwargs:
-            total += len(kwargs["info_list"])
-        if "preview_list" in kwargs:
-            total += len(kwargs["preview_list"])
-        if "article_count" in kwargs:
-            total += kwargs["article_count"]
-        for key in ("info", "download", "preview", "article"):
-            if kwargs.get(key):
-                total += 1
-        return max(1, total)
-
-    def init_for_task(self, estimated_requests: int,
-                      forced_mode: Optional[_RateLimitMode] = None) -> _RateLimitMode:
-        if forced_mode:
-            self.mode = forced_mode
-        else:
-            if estimated_requests <= self.cfg.small_task_threshold:
-                self.mode = _RateLimitMode.OFF
-            elif estimated_requests <= self.cfg.large_task_threshold:
-                self.mode = _RateLimitMode.FIXED
-            else:
-                self.mode = _RateLimitMode.ADAPTIVE
-        self._current_rps = self.cfg.adaptive_initial_rps
-        self._consecutive_success = 0
-        self._consecutive_429 = 0
-        self._last_request_time = 0
-        self._total_requests = 0
-        self._limited_requests = 0
-        self._start_time = time.time()
-        self._429_count = 0
-        return self.mode
-
-    def mode_desc(self) -> str:
-        return {
-            _RateLimitMode.OFF: "off (small task)",
-            _RateLimitMode.FIXED: f"fixed {self.cfg.fixed_rps:.0f} req/s",
-            _RateLimitMode.ADAPTIVE: f"adaptive ({self._current_rps:.1f} req/s)",
-            _RateLimitMode.AUTO: "auto",
-        }.get(self.mode, "unknown")
-
-    def acquire(self):
-        """Call before each HTTP request."""
-        if self.mode == _RateLimitMode.OFF:
-            return
-        self._total_requests += 1
-        interval = 1.0 / (self._current_rps if self.mode == _RateLimitMode.ADAPTIVE
-                          else self.cfg.fixed_rps)
-        now = time.time()
-        elapsed = now - self._last_request_time
-        if elapsed < interval:
-            time.sleep(interval - elapsed)
-            self._limited_requests += 1
-        self._last_request_time = time.time()
-
-    def report_success(self, response_time_ms: float = 0):
-        """Call after successful request."""
-        if self.mode != _RateLimitMode.ADAPTIVE:
-            return
-        self._consecutive_success += 1
-        self._consecutive_429 = 0
-        if self._consecutive_success >= 5 and response_time_ms < 500:
-            self._current_rps = min(self._current_rps * 1.1, self.cfg.adaptive_max_rps)
-            self._consecutive_success = 0
-
-    def report_429(self):
-        """Call after receiving HTTP 429."""
-        self._429_count += 1
-        self._consecutive_success = 0
-        self._consecutive_429 += 1
-        backoff = _backoff(min(self._consecutive_429, 4))
-        print(f"  [429] Rate limited. Backing off {backoff:.1f}s..."
-              f" (strike {self._consecutive_429})", file=sys.stderr)
-        time.sleep(backoff)
-        if self.mode == _RateLimitMode.ADAPTIVE:
-            self._current_rps = max(self._current_rps * 0.6, self.cfg.adaptive_min_rps)
-            print(f"  [Adaptive] Reduced to {self._current_rps:.1f} req/s", file=sys.stderr)
-
-    def report_slow(self, response_time_ms: float):
-        """Call after a very slow response."""
-        if self.mode == _RateLimitMode.ADAPTIVE and response_time_ms > 2000:
-            self._current_rps = max(self._current_rps * 0.85, self.cfg.adaptive_min_rps)
-
-    def print_summary(self):
-        if self._total_requests == 0:
-            return
-        elapsed = time.time() - (self._start_time or time.time())
-        actual_rps = self._total_requests / elapsed if elapsed > 0 else 0
-        print(f"\n[RateLimit] {self.mode_desc()} | "
-              f"{self._total_requests} requests in {elapsed:.1f}s "
-              f"({actual_rps:.1f} req/s)"
-              f"{' | 429s: ' + str(self._429_count) if self._429_count else ''}",
-              file=sys.stderr)
-
-
-# Global limiter instance (initialized in main)
-_limiter: Optional[_SmartRateLimiter] = None
-
-
-def _get_limiter() -> _SmartRateLimiter:
-    if _limiter is None:
-        return _SmartRateLimiter()  # no-op OFF mode
-    return _limiter
-
-
-# ---------------------------------------------------------------------------
-# Chinese numeral conversion
-# ---------------------------------------------------------------------------
-
-_CN_NUMERALS = {
-    "零": 0, "一": 1, "二": 2, "三": 3, "四": 4,
-    "五": 5, "六": 6, "七": 7, "八": 8, "九": 9,
-    "十": 10, "百": 100, "千": 1000, "万": 10000,
-}
-_CN_NUMBERS = {}
-
-
-def _chinese_to_int(cn: str) -> int:
-    if not cn:
-        return 0
-    if cn in _CN_NUMBERS:
-        return _CN_NUMBERS[cn]
-    total = 0
-    partial = 0
-    for ch in cn:
-        val = _CN_NUMERALS.get(ch, 0)
-        if val >= 10:
-            if partial == 0:
-                partial = 1
-            total += partial * val
-            partial = 0
-        else:
-            partial = partial * 10 + val if partial else val
-    total += partial
-    return total
-
-
-def _int_to_chinese(n: int) -> str:
-    if n <= 0:
-        return ""
-    if n in _CN_NUMBERS:
-        return _CN_NUMBERS[n]
-    if n < 10:
-        return ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"][n]
-    if n < 20:
-        return "十" + ("" if n == 10 else _int_to_chinese(n - 10))
-    if n < 100:
-        tens, ones = divmod(n, 10)
-        return _int_to_chinese(tens) + "十" + ("" if ones == 0 else _int_to_chinese(ones))
-    if n < 1000:
-        hunds, rest = divmod(n, 100)
-        prefix = _int_to_chinese(hunds) + "百"
-        if rest == 0:
-            return prefix
-        if rest < 10:
-            return prefix + "零" + _int_to_chinese(rest)
-        if rest < 20:
-            return prefix + "一" + _int_to_chinese(rest)
-        return prefix + _int_to_chinese(rest)
-    if n < 10000:
-        thous, rest = divmod(n, 1000)
-        prefix = _int_to_chinese(thous) + "千"
-        if rest == 0:
-            return prefix
-        if rest < 100:
-            return prefix + "零" + _int_to_chinese(rest)
-        return prefix + _int_to_chinese(rest)
-    return str(n)
-
-
-for _i in range(1, 200):
-    _CN_NUMBERS[_i] = _int_to_chinese(_i)
+def _request(method, url, **kwargs):
+    """Thin wrapper so tests can mock download._request while using shared http_request."""
+    kwargs.setdefault("headers", HEADERS)
+    return http_request(method, url, **kwargs)
 
 
 # ---------------------------------------------------------------------------
 # Core API helpers
 # ---------------------------------------------------------------------------
-
-def _request(method, url, **kwargs):
-    """Make a request with rate limiting, 429 handling, and retries."""
-    kwargs.setdefault("headers", HEADERS)
-    kwargs.setdefault("timeout", 30)
-    kwargs.setdefault("verify", VERIFY_SSL)
-
-    limiter = _get_limiter()
-    limiter.acquire()
-
-    last_err = None
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            start = time.time()
-            resp = requests.request(method, url, **kwargs)
-            elapsed_ms = (time.time() - start) * 1000
-
-            # 429: rate limited - special backoff
-            if resp.status_code == 429:
-                limiter.report_429()
-                last_err = "HTTP 429"
-                if attempt < MAX_RETRIES:
-                    continue
-                raise RuntimeError(f"HTTP 429 Too Many Requests after {MAX_RETRIES} retries")
-
-            # Other retryable status codes
-            if resp.status_code in RETRYABLE_STATUS_CODES:
-                last_err = f"HTTP {resp.status_code}"
-                if attempt < MAX_RETRIES:
-                    time.sleep(_backoff(attempt))
-                    continue
-                raise RuntimeError(f"HTTP {resp.status_code} after {MAX_RETRIES} retries")
-
-            # Success feedback for adaptive mode
-            limiter.report_success(elapsed_ms)
-            if elapsed_ms > 2000:
-                limiter.report_slow(elapsed_ms)
-
-            # 2xx, 3xx, and non-retryable 4xx
-            if resp.status_code < 500:
-                return resp
-
-            last_err = f"HTTP {resp.status_code}"
-        except requests.RequestException as e:
-            last_err = str(e)
-
-        if attempt < MAX_RETRIES:
-            time.sleep(_backoff(attempt))
-
-    raise RuntimeError(f"Request failed after {MAX_RETRIES} attempts: {last_err}")
 
 
 def search_laws(keyword: str, page: int = 1, size: int = 20,
@@ -612,6 +257,7 @@ def collect_search_urls(data: dict, fmt: str = "docx") -> list:
 # DOCX / article helpers
 # ---------------------------------------------------------------------------
 
+
 def _detect_numbering_patterns(content_tree: dict) -> dict:
     patterns = {"primary": "chinese", "has_chinese": False, "has_arabic": False, "sample_titles": []}
     if not content_tree:
@@ -640,34 +286,6 @@ def _detect_numbering_patterns(content_tree: dict) -> dict:
     return patterns
 
 
-def _extract_paragraphs_from_docx(content: bytes) -> list:
-    """Extract text paragraphs. Supports .docx (ZIP) and .doc (OLE) formats."""
-    if content[:4] == b"PK\x03\x04":  # ZIP = DOCX
-        with zipfile.ZipFile(BytesIO(content), "r") as z:
-            with z.open("word/document.xml") as f:
-                tree = ET.parse(f)
-        W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
-        return ["".join(t.text for t in p.iter(f"{W}t") if t.text)
-                for p in tree.iter(f"{W}p")
-                if any(t.text for t in p.iter(f"{W}t"))]
-
-    # Old .doc format - try antiword or catdoc
-    for tool in ["antiword", "catdoc"]:
-        try:
-            result = subprocess.run([tool, "-"], input=content, capture_output=True, timeout=30)
-            if result.returncode == 0:
-                text = result.stdout.decode("utf-8", errors="replace")
-                if text.strip():
-                    return [line for line in text.split("\n") if line.strip()]
-        except (FileNotFoundError, subprocess.TimeoutExpired):
-            continue
-
-    raise RuntimeError(
-        "File is in old .doc format (not .docx) and no conversion tool found. "
-        "Install antiword or catdoc: apt-get install antiword catdoc"
-    )
-
-
 def _download_docx_text(bbbs_id: str) -> tuple:
     """Download DOCX (or .doc) and extract paragraphs + metadata. Uses cache."""
     raw = fetch_detail(bbbs_id)
@@ -686,51 +304,6 @@ def _download_docx_text(bbbs_id: str) -> tuple:
         _cache.set_file(docx_key, docx_bytes)
     paragraphs = _extract_paragraphs_from_docx(docx_bytes)
     return paragraphs, info
-
-
-def _is_article_line(line: str) -> bool:
-    return bool(re.match(r"^第[一二三四五六七八九十百千万零\d]+条", line.strip()))
-
-
-def _extract_article_number(line: str) -> str:
-    m = re.match(r"(第[一二三四五六七八九十百千万零\d]+条)", line.strip())
-    return m.group(1) if m else line[:20]
-
-
-def _split_into_articles(paragraphs: list) -> list:
-    articles = []
-    current_num = "题注/前言"
-    current_lines = []
-    for line in paragraphs:
-        line_stripped = line.strip()
-        if not line_stripped:
-            continue
-        if _is_article_line(line_stripped):
-            if current_lines:
-                articles.append((current_num, "\n".join(current_lines)))
-            current_num = _extract_article_number(line_stripped)
-            current_lines = [line_stripped]
-        else:
-            current_lines.append(line_stripped)
-    if current_lines:
-        articles.append((current_num, "\n".join(current_lines)))
-    return articles
-
-
-def _match_article_query(query: str, article_number: str) -> bool:
-    query = query.strip()
-    if query in article_number:
-        return True
-    m = re.match(r"^第(\d+)条$", query)
-    if m:
-        n = int(m.group(1))
-        return f"第{_int_to_chinese(n)}条" == article_number or f"第{n}条" == article_number
-    if re.match(r"^\d+$", query):
-        n = int(query)
-        return f"第{_int_to_chinese(n)}条" == article_number
-    if re.match(r"^[一二三四五六七八九十百千万零]+$", query):
-        return f"第{query}条" == article_number
-    return False
 
 
 def preview_law(bbbs_id: str):
@@ -804,6 +377,7 @@ def query_article(bbbs_id: str, query: str = None, grep: str = None):
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the CLI argument parser."""
     parser = argparse.ArgumentParser(
@@ -857,10 +431,8 @@ def main():
     args = parser.parse_args()
 
     # Initialize rate limiter
-    global _limiter
-    _limiter = _SmartRateLimiter()
+    limiter, forced_mode = init_limiter("auto")
 
-    forced_mode = None
     rl = (args.rate_limit or "auto").lower().strip()
     if rl in ("auto", ""):
         forced_mode = None
@@ -874,7 +446,7 @@ def main():
         try:
             rps = float(rl)
             cfg = _RateLimitConfig(fixed_rps=rps)
-            _limiter = _SmartRateLimiter(cfg)
+            limiter = _SmartRateLimiter(cfg)
             forced_mode = _RateLimitMode.FIXED
         except ValueError:
             print(f"Warning: Unknown --rate-limit '{args.rate_limit}', using auto",
@@ -889,15 +461,15 @@ def main():
         preview=args.preview,
         article=args.article,
     )
-    mode = _limiter.init_for_task(estimated, forced_mode=forced_mode)
+    mode = limiter.init_for_task(estimated, forced_mode=forced_mode)
     if mode != _RateLimitMode.OFF:
-        print(f"[RateLimit] {estimated} requests estimated -> {_limiter.mode_desc()}",
+        print(f"[RateLimit] {estimated} requests estimated -> {limiter.mode_desc()}",
               file=sys.stderr)
 
     # Cache management
     if args.no_cache:
         global _cache
-        _cache = _CacheManager(enabled=False)
+        _cache = _CacheManager(enabled=False, namespace="npc-law-db")
     if args.cache_stats:
         stats = _cache.stats()
         print(f"Cache: {stats['entries']} entries, {stats['size_kb']} KB")
@@ -951,7 +523,7 @@ def main():
             parser.print_help()
             sys.exit(1)
     finally:
-        _limiter.print_summary()
+        limiter.print_summary()
 
 
 if __name__ == "__main__":

@@ -2,11 +2,15 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-ZongziForu%2Fnpc--law--db-blue)](https://github.com/ZongziForu/npc-law-db)
 
-A Claude Code / Kimi Agent skill for accessing China's **National Laws and Regulations Database** (`flk.npc.gov.cn`).
+A Claude Code / Kimi Agent skill for accessing three Chinese legal databases:
 
-Search, browse, download, and classify Chinese legal documents — including constitutional laws, statutes, administrative regulations, local regulations, judicial interpretations, and supervisory regulations.
+1. **国家法律法规数据库 (NPC)** — `flk.npc.gov.cn`
+2. **国家规章库 (Gov Rules)** — `gov.cn/zhengce/xxgk/gjgzk/`
+3. **外交条约库 (Treaty)** — `treaty.mfa.gov.cn`
 
-> **中文**：这是一个用于访问中国国家法律法规数据库（`flk.npc.gov.cn`）的 Claude Code / Kimi Agent skill。支持搜索、浏览、下载和分类中国法律文件，包括宪法、法律、行政法规、地方性法规、司法解释和监察法规。
+Search, browse, download, and classify Chinese legal documents — including constitutional laws, statutes, administrative regulations, local regulations, judicial interpretations, supervisory regulations, State Council rules, and international treaties.
+
+> **中文**：这是一个用于访问中国三大法律数据库的 Claude Code / Kimi Agent skill。支持搜索、浏览、下载和分类中国法律文件，包括宪法、法律、行政法规、地方性法规、司法解释、监察法规、国家规章以及国际条约。
 
 ---
 
@@ -14,12 +18,16 @@ Search, browse, download, and classify Chinese legal documents — including con
 
 ### 功能
 
+- **多数据源支持**：
+  - 国家法律法规数据库（`flk.npc.gov.cn`）
+  - 国家规章库（`gov.cn/zhengce/xxgk/gjgzk/`）
+  - 外交条约库（`treaty.mfa.gov.cn`）
 - **搜索法规**：通过标题或正文关键词搜索国家法律法规数据库。
 - **精确 / 模糊策略**：根据任务自动选择精确标题匹配或模糊匹配，减少噪音。
 - **全文搜索**：`--range content` 可在法规正文中搜索。
 - **状态筛选**：`--status 3` 只返回现行有效法规。
 - **批量采集**：支持一次性采集 200–300 条法规的完整工作流。
-- **下载文件**：支持 DOCX（WPS 版）和 PDF（公报原版）下载。
+- **下载文件**：支持 DOCX（WPS 版）和 PDF（公报原版）下载；规章库和条约库支持下载详情页和附件。
 - **法规预览与单条法条查询**：`--preview` 查看结构，`--article` 按条号或关键词查询单部法规内的法条。
 - **跨法规法条级搜索**：`scripts/article_search.py` 按关键词搜索多部法规，返回具体匹配的法条。
 - **智能限速**：根据任务大小自动选择关闭/固定/自适应限速，避免 429。
@@ -82,6 +90,18 @@ python scripts/download.py --info <bbbs_id>
 
 # 查看缓存状态
 python scripts/download.py --cache-stats
+
+# 国家规章库：搜索部门规章
+python scripts/gov_rules_crawler.py --search "管理办法" --categories 部门规章 --size 20
+
+# 国家规章库：下载详情页和附件
+python scripts/gov_rules_crawler.py --categories 部门规章 --size 5 --download
+
+# 外交条约库：搜索双边条约
+python scripts/treaty_crawler.py --collections 双边 --search "上海合作组织" --size 20
+
+# 外交条约库：下载条约预览 PDF
+python scripts/treaty_crawler.py --collections 双边 --size 5 --download
 ```
 
 ### 单条/多条法条查询
@@ -196,11 +216,16 @@ npc-law-db/
 ├── README.md                     # 本文件
 ├── requirements.txt              # Python 依赖
 ├── scripts/
-│   ├── download.py               # 搜索、下载、导出 URL、预览/查询法条
-│   ├── article_search.py         # 跨法规法条级关键词搜索
+│   ├── common.py                 # 共享工具：缓存、限速、HTTP、文件 I/O
+│   ├── download.py               # NPC 搜索、下载、导出 URL、预览/查询法条
+│   ├── article_search.py         # NPC 跨法规法条级关键词搜索
+│   ├── gov_rules_crawler.py      # 国家规章库爬虫
+│   ├── treaty_crawler.py         # 外交条约库爬虫
 │   └── region_classifier.py      # 地域分类与存在性矩阵
 └── references/
-    ├── api_reference.md          # API 端点与参数参考
+    ├── api_reference.md          # NPC API 端点与参数参考
+    ├── gov_rules_api_reference.md # 国家规章库 API 与认证参考
+    ├── treaty_api_reference.md   # 外交条约库 HTML 结构参考
     ├── batch_collection.md       # 200-300 条批量采集指南
     ├── page_structure.md         # 页面结构说明
     ├── kimi_bridge_adapter.md    # Claude Code / Kimi Agent 适配
@@ -209,7 +234,7 @@ npc-law-db/
 
 ### 免责声明
 
-本工具仅用于学习和研究目的。请遵守 `flk.npc.gov.cn` 的使用条款，不要高频请求或用于商业用途。
+本工具仅用于学习和研究目的。请遵守 `flk.npc.gov.cn`、`gov.cn` 和 `treaty.mfa.gov.cn` 的使用条款，不要高频请求或用于商业用途。
 
 ---
 
@@ -217,12 +242,16 @@ npc-law-db/
 
 ### Features
 
+- **Multi-database support**:
+  - National Laws and Regulations Database (`flk.npc.gov.cn`)
+  - State Council Rules Database (`gov.cn/zhengce/xxgk/gjgzk/`)
+  - Ministry of Foreign Affairs Treaty Database (`treaty.mfa.gov.cn`)
 - **Search regulations**: Search by title or full-text keyword in the NPC database.
 - **Exact / fuzzy strategy**: Automatically choose exact title match or fuzzy match based on the task to reduce noise.
 - **Full-text search**: `--range content` searches inside the body of laws.
 - **Status filter**: `--status 3` returns only currently effective laws.
 - **Batch collection**: Complete workflow for collecting 200–300 regulations at once.
-- **Download files**: Supports DOCX (WPS version) and PDF (gazette version).
+- **Download files**: Supports DOCX (WPS version) and PDF (gazette version) for NPC; detail pages and attachments for Gov Rules/Treaty.
 - **Preview and article lookup**: `--preview` shows structure; `--article` queries a specific article or keyword inside one law.
 - **Article-level search across laws**: `scripts/article_search.py` returns specific articles matching a keyword across multiple laws.
 - **Smart rate limiting**: Auto OFF / FIXED / ADAPTIVE based on task size to avoid 429 errors.
@@ -285,6 +314,18 @@ python scripts/download.py --info <bbbs_id>
 
 # Check cache status
 python scripts/download.py --cache-stats
+
+# State Council Rules Database: search department rules
+python scripts/gov_rules_crawler.py --search "management measures" --categories 部门规章 --size 20
+
+# State Council Rules Database: download detail pages and attachments
+python scripts/gov_rules_crawler.py --categories 部门规章 --size 5 --download
+
+# Ministry of Foreign Affairs Treaty Database: search bilateral treaties
+python scripts/treaty_crawler.py --collections 双边 --search "Shanghai Cooperation Organization" --size 20
+
+# Ministry of Foreign Affairs Treaty Database: download treaty preview PDFs
+python scripts/treaty_crawler.py --collections 双边 --size 5 --download
 ```
 
 ### Query Single / Multiple Articles
@@ -399,11 +440,16 @@ npc-law-db/
 ├── README.md                     # This file
 ├── requirements.txt              # Python dependencies
 ├── scripts/
-│   ├── download.py               # Search, download, URL export, preview/article lookup
-│   ├── article_search.py         # Article-level keyword search across laws
+│   ├── common.py                 # Shared utilities: cache, rate limiter, HTTP, file I/O
+│   ├── download.py               # NPC search, download, URL export, preview/article lookup
+│   ├── article_search.py         # NPC article-level keyword search across laws
+│   ├── gov_rules_crawler.py      # State Council Rules Database crawler
+│   ├── treaty_crawler.py         # Ministry of Foreign Affairs Treaty Database crawler
 │   └── region_classifier.py      # Region classification & matrix
 └── references/
-    ├── api_reference.md          # API endpoint & parameter reference
+    ├── api_reference.md          # NPC API endpoint & parameter reference
+    ├── gov_rules_api_reference.md # State Council Rules API & auth reference
+    ├── treaty_api_reference.md   # Ministry of Foreign Affairs Treaty HTML reference
     ├── batch_collection.md       # 200-300 file batch collection guide
     ├── page_structure.md         # Page structure overview
     ├── kimi_bridge_adapter.md    # Claude Code / Kimi Agent adapter
@@ -412,4 +458,4 @@ npc-law-db/
 
 ### Disclaimer
 
-This tool is for educational and research purposes only. Please comply with the terms of use of `flk.npc.gov.cn`, avoid high-frequency requests, and do not use it for commercial purposes.
+This tool is for educational and research purposes only. Please comply with the terms of use of `flk.npc.gov.cn`, `gov.cn`, and `treaty.mfa.gov.cn`, avoid high-frequency requests, and do not use it for commercial purposes.
