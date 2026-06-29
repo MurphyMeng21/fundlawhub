@@ -17,7 +17,9 @@ from pathlib import Path
 from urllib.parse import urljoin
 
 from common import (
+    _CacheManager,
     clean_text, ensure_dir, extract_year, format_request_exception,
+    DEFAULT_USER_AGENT,
     get_cache, http_request, init_limiter, redact_url, render_markdown_report,
     sanitize_filename, setup_logger, unique_path, write_csv, write_json, write_jsonl,
     write_text,
@@ -36,12 +38,11 @@ COLLECTION_URLS = {
 }
 DEFAULT_COLLECTIONS = ["全部", "双边", "多边"]
 HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 cn-law-hub/1.0"
-    ),
+    "User-Agent": DEFAULT_USER_AGENT,
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
+
+_cache = get_cache("npc-law-db-treaty")
 
 # ---------------------------------------------------------------------------
 # HTML parsing helpers
@@ -49,8 +50,13 @@ HEADERS = {
 
 
 def fetch_html(url: str, timeout: int = 30):
+    cache_key = _cache._key("html", url)
+    cached_html = _cache.get(cache_key, max_age=86400)
+    if cached_html and BeautifulSoup is not None:
+        return BeautifulSoup(cached_html, "html.parser")
     resp = http_request("GET", url, headers=HEADERS, timeout=timeout)
     resp.encoding = "utf-8"
+    _cache.set(cache_key, resp.text)
     if BeautifulSoup is not None:
         return BeautifulSoup(resp.text, "html.parser")
     return resp.text
@@ -80,6 +86,10 @@ def parse_list_page(soup) -> list[dict]:
     return items
 
 
+def _normalize_label(s: str) -> str:
+    return re.sub(r"\s+|[：:]", "", s)
+
+
 def parse_detail(detail_url: str) -> dict:
     soup = fetch_html(detail_url)
     if isinstance(soup, str):
@@ -97,20 +107,21 @@ def parse_detail(detail_url: str) -> dict:
 
     # Parse metadata table if present
     field_map = {
-        "类别：": "category",
-        "领域：": "domain",
-        "我国签署时间：": "sign_date",
-        "条约生效时间：": "effective_date",
-        "对我国生效时间：": "effective_to_china",
-        "保存机关：": "depositary",
-        "签署地点：": "sign_place",
-        "港澳情况：": "hong_kong_macau",
-        "我国声明保留情况：": "statement_reservation",
-        "其他：": "other_info",
-        "条约通过时间：": "adoption_date",
-        "我国批准/核准/\n接受/加入时间：": "ratification_date",
-        "我国批准/核准/接受/加入时间：": "ratification_date",
-        "条约适用于": "applies_to",
+        _normalize_label(k): v for k, v in {
+            "类别：": "category",
+            "领域：": "domain",
+            "我国签署时间：": "sign_date",
+            "条约生效时间：": "effective_date",
+            "对我国生效时间：": "effective_to_china",
+            "保存机关：": "depositary",
+            "签署地点：": "sign_place",
+            "港澳情况：": "hong_kong_macau",
+            "我国声明保留情况：": "statement_reservation",
+            "其他：": "other_info",
+            "条约通过时间：": "adoption_date",
+            "我国批准/核准/接受/加入时间：": "ratification_date",
+            "条约适用于": "applies_to",
+        }.items()
     }
 
     fields = {v: "" for v in field_map.values()}
@@ -120,7 +131,7 @@ def parse_detail(detail_url: str) -> dict:
             cells = row.find_all("td")
             # Table layout: [label, value, label, value]
             for i in range(0, len(cells) - 1, 2):
-                label = clean_text(cells[i].get_text("\n", strip=True))
+                label = _normalize_label(cells[i].get_text("\n", strip=True))
                 value = clean_text(cells[i + 1].get_text(" ", strip=True))
                 key = field_map.get(label)
                 if key:
@@ -292,6 +303,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output", "-o", default="./treaty_output", help="Output directory")
     parser.add_argument("--rate-limit", choices=["auto", "off", "fixed", "adaptive"], default="auto")
     parser.add_argument("--timeout", type=int, default=30)
+    parser.add_argument("--no-cache", action="store_true")
+    parser.add_argument("--cache-stats", action="store_true")
+    parser.add_argument("--cache-clear", action="store_true")
     return parser
 
 
@@ -304,6 +318,19 @@ def main() -> int:
 
     output_dir = Path(args.output).expanduser().resolve()
     logger = setup_logger(output_dir, name="treaty_crawler")
+
+    if args.no_cache:
+        global _cache
+        _cache = _CacheManager(enabled=False, namespace="npc-law-db-treaty")
+    if args.cache_stats:
+        stats = _cache.stats()
+        print(f"Cache: {stats['entries']} entries, {stats['size_kb']} KB")
+        print(f"Location: {_cache.dir}")
+        return 0
+    if args.cache_clear:
+        _cache.clear()
+        print("Cache cleared.")
+        return 0
 
     if args.info:
         detail = parse_detail(args.info)

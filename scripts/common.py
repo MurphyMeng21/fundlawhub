@@ -35,6 +35,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 VERIFY_SSL = os.getenv("NPC_LAW_VERIFY_SSL", "0") == "1"
 NO_CACHE = os.getenv("NPC_LAW_NO_CACHE", "0") == "1"
 MAX_RETRIES = 4
+
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 cn-law-hub/1.0"
+)
 BASE_BACKOFF = 1.0
 MAX_BACKOFF = 30.0
 

@@ -18,7 +18,9 @@ from pathlib import Path
 from urllib.parse import quote, urljoin, urlparse
 
 from common import (
+    _CacheManager,
     clean_text, ensure_dir, extract_year, format_request_exception,
+    DEFAULT_USER_AGENT,
     get_cache, http_request, init_limiter, redact_url, render_markdown_report,
     sanitize_filename, setup_logger, unique_path, write_csv, write_json, write_jsonl,
     write_text,
@@ -41,12 +43,11 @@ QUERY_ENDPOINT_PATH = "/athena/forward/BD8730CDDA12515E2D9E1B21AA11C0D6"
 CATEGORY_MAP = {"部门规章": "部门规章", "地方政府规章": "地方政府规章"}
 DEFAULT_CATEGORIES = ["部门规章", "地方政府规章"]
 HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 cn-law-hub/1.0"
-    ),
+    "User-Agent": DEFAULT_USER_AGENT,
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
+
+_cache = get_cache("npc-law-db-govrules")
 
 # ---------------------------------------------------------------------------
 # Athena auth discovery (RSA key extraction from frontend JS)
@@ -88,10 +89,7 @@ class AthenaAuth:
 
     def headers(self) -> dict:
         return {
-            "User-Agent": (
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 cn-law-hub/1.0"
-            ),
+            "User-Agent": DEFAULT_USER_AGENT,
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "Content-Type": "application/json;charset=UTF-8",
             "Referer": "https://www.gov.cn/",
@@ -106,6 +104,10 @@ class AthenaAuth:
 
 
 def search_page(auth: AthenaAuth, category_name: str, page_no: int, page_size: int = 500, timeout: int = 30) -> dict:
+    cache_key = _cache._key("search_page", category_name, str(page_no), str(page_size))
+    cached = _cache.get(cache_key, max_age=3600)
+    if cached:
+        return cached
     payload = {
         "code": "18258ab0ac9",
         "preference": None,
@@ -131,7 +133,9 @@ def search_page(auth: AthenaAuth, category_name: str, page_no: int, page_size: i
     data = resp.json()
     if data["resultCode"]["code"] != 200:
         raise RuntimeError(f"Search failed: {data['resultCode']}")
-    return data["result"]["data"]
+    result = data["result"]["data"]
+    _cache.set(cache_key, result)
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -140,11 +144,12 @@ def search_page(auth: AthenaAuth, category_name: str, page_no: int, page_size: i
 
 
 def parse_detail_page(detail_url: str, timeout: int = 30) -> dict:
+    cache_key = _cache._key("detail_html", detail_url)
+    cached = _cache.get(cache_key, max_age=86400)
+    if cached:
+        return cached
     resp = http_request("GET", detail_url, headers={
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 cn-law-hub/1.0"
-        ),
+        "User-Agent": DEFAULT_USER_AGENT,
         "Accept": "text/html",
     }, timeout=timeout)
     resp.encoding = "utf-8"
@@ -162,16 +167,13 @@ def parse_detail_page(detail_url: str, timeout: int = 30) -> dict:
     else:
         text_content = ""
         attachments = []
-    return {"html": html, "text": text_content, "attachments": attachments}
+    result = {"html": html, "text": text_content, "attachments": attachments}
+    _cache.set(cache_key, result)
+    return result
 
 
 def download_file(url: str, path: Path, timeout: int = 60) -> Path:
-    resp = http_request("GET", url, headers={
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 cn-law-hub/1.0"
-        ),
-    }, timeout=timeout)
+    resp = http_request("GET", url, headers={"User-Agent": DEFAULT_USER_AGENT}, timeout=timeout)
     final_path = unique_path(path)
     with final_path.open("wb") as fh:
         for chunk in resp.iter_content(chunk_size=1024 * 64):
@@ -310,6 +312,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output", "-o", default="./gov_rules_output")
     parser.add_argument("--rate-limit", choices=["auto", "off", "fixed", "adaptive"], default="auto")
     parser.add_argument("--timeout", type=int, default=30)
+    parser.add_argument("--no-cache", action="store_true")
+    parser.add_argument("--cache-stats", action="store_true")
+    parser.add_argument("--cache-clear", action="store_true")
     return parser
 
 
@@ -325,6 +330,19 @@ def main() -> int:
 
     output_dir = Path(args.output).expanduser().resolve()
     logger = setup_logger(output_dir, name="gov_rules_crawler")
+
+    if args.no_cache:
+        global _cache
+        _cache = _CacheManager(enabled=False, namespace="npc-law-db-govrules")
+    if args.cache_stats:
+        stats = _cache.stats()
+        print(f"Cache: {stats['entries']} entries, {stats['size_kb']} KB")
+        print(f"Location: {_cache.dir}")
+        return 0
+    if args.cache_clear:
+        _cache.clear()
+        print("Cache cleared.")
+        return 0
 
     if args.info:
         detail = parse_detail_page(args.info)

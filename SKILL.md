@@ -17,6 +17,8 @@ This skill supports three legal databases:
 
 Official database: `https://flk.npc.gov.cn`. Maintained by NPC Standing Committee.
 
+NPC helper scripts: use `scripts/download.py` for law-level search/download and `scripts/article_search.py` for article-level keyword extraction across laws.
+
 ## Environment Selection
 
 This skill supports multiple agent environments. **Read the adapter for your environment first**:
@@ -24,16 +26,14 @@ This skill supports multiple agent environments. **Read the adapter for your env
 | Environment | Read This | Tool prerequisite |
 |-------------|-----------|-------------------|
 | **Kimi Agent (cloud)** | `references/kimi_bridge_adapter.md` | Native `mshtools-browser_*` tools |
-| **Claude Code (local)** | `references/kimi_bridge_adapter.md` | Invoke the `kimi-webbridge` skill first to obtain browser tools |
-| **Codex** | `references/codex_adapter.md` | `mcp__node_repl__js` (Node REPL) for browser control |
+| **Claude Code (local via kimi-webbridge)** | `references/kimi_bridge_adapter.md` | Invoke `kimi-webbridge` first to obtain the same browser tool interface |
+| **Codex** | `references/codex_adapter.md` | `mcp__node_repl__js` for browser control |
 
-> **Claude Code quick start:** Before running any browser workflow, tell the user to run `/kimi-webbridge` (or invoke the `kimi-webbridge` skill). The browser tools (`browser_visit`, `browser_click`, etc.) referenced in this skill are provided by that bridge, not by Claude Code natively.
->
-> **Codex quick start:** All browser operations use the Playwright API through the Node REPL (`mcp__node_repl__js`). Read `references/codex_adapter.md` for the complete bootstrap and API mapping. The adapter covers both Codex Desktop (in-app browser) and Codex Chrome plugin.
+Kimi Agent and Claude Code via kimi-webbridge intentionally share the same adapter because their browser-operation semantics are the same.
 
-## Setup
+## Project Setup
 
-The bundled Python script needs `requests`. DOCX parsing uses the Python stdlib; old `.doc` files require optional system tools. Install once:
+Install Python dependencies once. Old `.doc` parsing is mainly needed for some NPC legacy regulation files; DOCX parsing uses the Python stdlib.
 
 ```bash
 pip install -r requirements.txt
@@ -42,18 +42,7 @@ apt-get install antiword catdoc  # Linux
 brew install antiword catdoc     # macOS
 ```
 
-## Page Structure Overview
-
-**Read `references/page_structure.md`** for complete visual layout of all pages before planning any retrieval task. Understanding the page structure helps you:
-- Predict where elements will appear after actions
-- Know which filters/sorts are available without exploring
-- Plan the most efficient navigation path for the task
-
-Key pages:
-- `/index` — Home with quick search, category cards, hot queries
-- `/search` — Results with filters (left sidebar), sort, pagination, batch actions
-- `/advanceSearch` — Multi-criteria advanced search form
-- `/detail?id={bbbs}` — Full text viewer with download options
+Page layout and browser automation details are in `references/page_structure.md`.
 
 ## Quick Reference
 
@@ -107,13 +96,11 @@ python scripts/download.py --article {bbbs_id} --grep "经济补偿"
 
 | Command | Use when | Output |
 |---------|---------|--------|
-| `--preview` | Understand structure before querying | Title, article count, **numbering pattern**, TOC |
+| `--preview` | Understand structure before querying | Title, article count, numbering pattern, TOC |
 | `--article "第X条"` | Know the article number | Single article (supports Chinese/Arabic/auto-convert) |
 | `--article --grep` | Find all articles with keyword in one law | All matching articles |
 
-> **Numbering pattern detection**: `--preview` first queries the lightweight Detail API to detect whether the law uses Chinese numerals (第一条), Arabic numerals (第1条), or mixed. This avoids failed lookups. If `--article` returns no match, it shows the detected format (e.g., "This law uses: 第一条") and suggests `--preview`.
->
-> **How it works**: Detail API content tree → detect numbering → download DOCX → parse → split by "第X条" → match. No file saved by default.
+> If `--article` misses, read the detected numbering hint and run `--preview` before retrying.
 
 ### Search API
 
@@ -139,21 +126,9 @@ Working payload:
 | `pageSize` | Up to at least 100 |
 | `sxx` | Status filter: `1`=已废止, `2`=已修改, `3`=现行有效, `4`=尚未生效 |
 
-**Strategy rule for the agent:** If the user gives an exact or near-exact regulation name, prefer `searchRange=1` + `searchType=1` (title exact). Use fuzzy only when the request is clearly a broad topic or when exact returns too few results. When uncertain, ask the user instead of guessing.
+Use the same strategy as the CLI workflow: exact or near-exact titles use `searchRange=1` + `searchType=1`; broad topic searches use `searchType=2`. Full parameters are in `references/api_reference.md`.
 
-For full parameter reference see `references/api_reference.md`.
-
-### Browser-Only Search → Download Workflow
-
-Use this only when the API fails or for tasks that require the UI (e.g., advanced search with complex AND/OR logic):
-
-```
-1. Visit /index
-2. Enter keyword in search input (center of page)
-3. Press Enter to search (do not click the magnifying glass icon, which opens /advanceSearch)
-4. On /search results: click a title to open detail
-5. On /detail: click 下载 → 点击下载 to save file
-```
+> **Browser fallback:** Use browser automation only when the API/script fails, when UI-only advanced search is required, or when the user explicitly requests UI operation; read `references/page_structure.md` first.
 
 ### Detail API (for metadata)
 
@@ -212,22 +187,14 @@ python scripts/article_search.py "违约金" --max-laws 3 --json
 | `--offset` | 0 | Skip first N laws (batch retrieval) |
 | `--resume` | | Skip laws whose DOCX is already in cache |
 
-**How it works:**
-1. Find candidate laws (by title or full text)
-2. Download DOCX for each law (cached)
-3. Parse DOCX → split into articles by "第X条"
-4. Return all matching articles with optional context
-
-**Progressive Batch Retrieval:**
-
-When the first batch doesn't yield enough results, continue with subsequent batches:
+**Progressive Batch Retrieval:** use `--offset N` to skip already-processed laws, or `--resume` to auto-skip cached ones:
 
 ```bash
 # Batch 1: process first 5 laws
 python scripts/article_search.py "违约金" --range content --max-laws 5
 # → "已处理: 5/342 部法规"
 
-# Batch 2: process laws 5-9
+# Batch 2: skip first 5 laws, then process laws 6-10
 python scripts/article_search.py "违约金" --range content --max-laws 5 --offset 5
 
 # Or: use --resume to skip already-processed laws and continue with new ones
@@ -236,164 +203,51 @@ python scripts/article_search.py "违约金" --range content --max-laws 5 --resu
 
 ### Authority / Region Categorization
 
-Issuing authority names (`zdjgName`) are irregular, especially for autonomous regions, and city-level authorities usually do not include the province name. Use the bundled `region_classifier.py` instead of string matching:
-
-```python
-from scripts.region_classifier import classify_by_authority
-
-classify_by_authority("广州市人民代表大会常务委员会")
-# {
-#   "province": "广东省",
-#   "province_short": "广东",
-#   "city": "广州市",
-#   "level": "city",
-#   "is_municipality": False,
-#   "authority": "广州市人民代表大会常务委员会"
-# }
-```
-
-The classifier covers all provincial-level regions, ~370 city/prefecture-level divisions, and common naming variants. For classification tasks, prefer the official `zdjgfl` codes from `GET /law-search/search/enumData` when available; use `region_classifier.py` for post-processing search results.
-
-CLI usage:
+Use `region_classifier.py` for province/city/level classification when issuing authority names (`zdjgName`) are irregular; prefer official `zdjgfl` codes from `GET /law-search/search/enumData` when available.
 
 ```bash
-# Run built-in tests
-python scripts/region_classifier.py --test
-
-# Classify search results from download.py --urls-only
 python scripts/download.py --search "物业管理条例" --urls-only --size 100 > urls.json
 python scripts/region_classifier.py --classify < urls.json > classified.json
-
-# Generate province existence matrix
 python scripts/region_classifier.py --matrix matrix.csv < classified.json
 ```
 
-### Rate Limiting
+### NPC Rate Limiting
 
-Automatic rate limiting is **enabled by default** to prevent 429 errors during bulk operations:
+Auto mode (default) picks the mode by estimated request count:
 
-```bash
-# Auto mode (default) — small tasks unlimited, medium=5rps, large=adaptive
-python scripts/download.py --search "出租车" --urls-only --size 100
+| Mode | Trigger | Speed |
+|------|---------|-------|
+| **OFF** | ≤10 requests | Unlimited |
+| **FIXED** | 11–100 requests | 5 req/s |
+| **ADAPTIVE** | >100 requests | 1–8 req/s, backs off on 429 |
 
-# Force fixed rate (5 requests/second)
-python scripts/download.py --search "出租车" --urls-only --size 50 --rate-limit fixed
+Override: `--rate-limit fixed/adaptive/off/N` (N = custom req/s).
 
-# Force adaptive (auto-adjust 1-8 rps based on server response)
-python scripts/download.py --search "出租车" --urls-only --size 200 --rate-limit adaptive
+### NPC Cache Management
 
-# Custom fixed rate
-python scripts/download.py --search "出租车" --urls-only --size 50 --rate-limit 3
+Local file cache enabled by default (`~/.cache/npc-law-db/`). Use `--cache-stats` / `--cache-clear` / `--no-cache`.
 
-# Disable (small tasks only)
-python scripts/download.py --info {bbbs_id} --rate-limit off
-```
+| Cache Type | TTL |
+|------------|-----|
+| Search results | 1 hour |
+| Detail metadata | 24 hours |
+| DOCX files | 7 days |
+| Signed URLs | not cached |
 
-| Mode | Trigger | Speed | Use case |
-|------|---------|-------|----------|
-| **OFF** | <=10 requests | Unlimited | Single query, preview, one article |
-| **FIXED** | 11-100 requests | 5 req/s | Medium batch download |
-| **ADAPTIVE** | >100 requests | 1-8 req/s | Large collection, auto-adjusts |
+## NPC Status Code Mapping (sxx field)
 
-> **429 handling**: When a 429 is received, the limiter backs off exponentially (2s, 4s, 8s...) and reduces speed. In adaptive mode, speed drops by 40% per 429 and recovers slowly on success.
-
-### Cache Management
-
-Local file cache is **enabled by default** to speed up repeated queries:
-
-```bash
-# Check cache status
-python scripts/download.py --cache-stats
-
-# Disable cache for a single run
-python scripts/download.py --no-cache --info {bbbs_id}
-
-# Clear all cache
-python scripts/download.py --cache-clear
-```
-
-| Cache Type | TTL | Speedup |
-|------------|-----|---------|
-| Search results | 1 hour | ~4x (API ~800ms → cache ~200ms) |
-| Detail metadata | 24 hours | ~3x (API ~600ms → cache ~200ms) |
-| DOCX files | 7 days | ~9x (download ~90ms → read ~10ms) |
-| Signed URLs | not cached | expire ~1 hour |
-
-Cache location: `~/.cache/npc-law-db/`
-
-### File Format Note
-
-The database serves two formats:
-- **DOCX** (most files): Modern ZIP-based format, parsed natively with stdlib
-- **DOC** (some older regulations): Pre-2007 binary format, requires `antiword` or `catdoc`
-
-The script auto-detects format and handles both transparently. If conversion tools are missing, you'll get a clear error with install instructions.
-
-### For 200-300 File Collection Tasks
-
-**Read `references/batch_collection.md`** before starting. The current recommended approach:
-1. Use the Search API to collect all target IDs in pages of 100
-2. Use the Download API (`/law-search/download/pc`) to fetch each file
-3. Save to local disk for persistence
-4. Browser automation is only needed as a fallback
-
-## Status Code Mapping (sxx field)
-
-All search and detail results include a `status_code` (sxx) integer. Verified mapping:
-
-| sxx | Status | Example |
-|-----|--------|---------|
-| `1` | **已废止** | 合同法（被民法典取代） |
-| `2` | **已修改** | 劳动法（2009年版，已有新版） |
-| `3` | **现行有效** | 劳动合同法 |
-| `4` | **尚未生效** | 生态环境法典（2026-03-12公布） |
+| sxx | Status |
+|-----|--------|
+| `1` | **已废止** |
+| `2` | **已修改** |
+| `3` | **现行有效** |
+| `4` | **尚未生效** |
 
 Filter by status: `--status 3` (only current), `--status 3,4` (current + upcoming)
 
-## Key Concepts
+Key NPC concepts: `bbbs` is the unique law ID used in detail URLs and script commands; `sxx` is the effective-status field (`1`=已废止, `2`=已修改, `3`=现行有效, `4`=尚未生效).
 
-| Term | Meaning |
-|------|---------|
-| bbbs | Unique law ID used in detail URLs (`?id=xxx`) |
-| 标题 | Title field (default search scope) |
-| 模糊/精确 | Fuzzy vs exact match modes |
-| 时效性 | Effective status: 已废止/已修改/现行有效/尚未生效 |
-| 公布日期 | Publish date |
-| 施行日期 | Effective date |
-| 命中展示 | Show keyword match locations in the law |
-
-## Sort Options
-
-1. 默认排序 2. 法律法规分类 3. 制定机关 4. 时效性 5. 公布日期 6. 施行日期
-
-## Category Codes
-
-宪法 / 法律 / 行政法规 / 监察法规 / 地方法规 / 司法解释
-
-## Download Options
-
-- **WPS版本**: Formatted DOCX (default view)
-- **公报原版**: Official gazette PDF
-- Both available via detail page 下载 button
-
-## Advanced Search
-
-Visit `/advanceSearch`. Supports:
-- Multi-field: title, full text, related materials title/text
-- Date ranges: publish date, effective date
-- Dropdowns: category, issuing authority
-- Checkboxes: effective status (multi-select)
-- Logic: 并且(AND) / 或者(OR) / 不含(NOT) between conditions
-
-## Batch Operations on Results Page
-
-- **全选**: Select all items on current page
-- **批量下载文件**: Download selected items
-- **批量导出文件目录**: Export catalog of selected items
-
-## Pagination
-
-Page sizes: 10/20/30/40/50/100 per page. Use 100 for fastest bulk ID collection.
+When the task requires sorting, category codes, download options, advanced search, batch UI actions, or pagination parameters, read `references/api_reference.md`.
 
 ---
 
@@ -419,24 +273,7 @@ python scripts/gov_rules_crawler.py --categories 部门规章 --size 10 --downlo
 
 ### Output
 
-Each run creates a directory per category under the output root:
-
-```
-gov_rules_output/
-├── summary.json
-├── logs/
-└── 部门规章/
-    ├── metadata.jsonl
-    ├── metadata.csv
-    ├── stats_report.json
-    ├── stats_report.md
-    ├── summary.json
-    └── files/
-        └── {rule_title}/
-            ├── page.html
-            ├── page.txt
-            └── attachments...
-```
+Output includes `summary.json`, `metadata.jsonl/csv`, `stats_report.json/md`, `logs/`, and downloaded files under `files/{rule_title}/`.
 
 ### Notes
 
@@ -468,22 +305,7 @@ python scripts/treaty_crawler.py --collections 双边 --size 5 --download
 
 ### Output
 
-Each run creates a directory per collection under the output root:
-
-```
-treaty_output/
-├── summary.json
-├── logs/
-└── 双边/
-    ├── metadata.jsonl
-    ├── metadata.csv
-    ├── stats_report.json
-    ├── stats_report.md
-    ├── summary.json
-    └── files/
-        └── {treaty_title}_{collection}/
-            └── {preview_pdfs}
-```
+Output includes `summary.json`, `metadata.jsonl/csv`, `stats_report.json/md`, `logs/`, and preview PDFs under `files/{treaty_title}_{collection}/`.
 
 ### Notes
 
@@ -493,38 +315,7 @@ treaty_output/
 
 ---
 
-## Shared Infrastructure
-
-All three scripts share `scripts/common.py` for:
-
-- **Caching**: file-based JSON/binary cache with TTL, namespace-isolated per database
-  - NPC: `~/.cache/npc-law-db/`
-  - Gov Rules: `~/.cache/npc-law-db-govrules/`
-  - Treaty: `~/.cache/npc-law-db-treaty/`
-- **Rate limiting**: global singleton, auto mode picks OFF/FIXED/ADAPTIVE by estimated request count
-- **HTTP client**: unified retry, 429 backoff, SSL toggle via `NPC_LAW_VERIFY_SSL`
-- **File I/O**: JSON/CSV/JSONL/markdown helpers
-- **Text utilities**: HTML tag stripping, filename sanitization, year extraction
-- **Chinese numerals**: article number conversion for NPC article lookup
-
-### Cache management per script
-
-```bash
-# Each script supports --no-cache
-python scripts/treaty_crawler.py --search "人权" --no-cache
-```
-
-### Rate limiting per script
-
-```bash
-# Small task: no throttle
-python scripts/gov_rules_crawler.py --info "..." --rate-limit off
-
-# Large task: adaptive
-python scripts/treaty_crawler.py --collections 全部 --size 200 --rate-limit adaptive
-```
-
----
+All crawler scripts support `--no-cache` and `--rate-limit {off|fixed|adaptive}`; use adaptive mode for large collection tasks.
 
 ## Script Reference Summary
 

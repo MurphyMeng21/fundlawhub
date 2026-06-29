@@ -48,6 +48,7 @@ from common import (
     _SmartRateLimiter,
     _backoff,
     chinese_to_int as _chinese_to_int,
+    DEFAULT_USER_AGENT,
     ensure_dir,
     extract_article_number as _extract_article_number,
     extract_paragraphs_from_docx as _extract_paragraphs_from_docx,
@@ -62,10 +63,7 @@ from common import (
 
 BASE_URL = "https://flk.npc.gov.cn"
 HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 cn-law-hub/1.0"
-    ),
+    "User-Agent": DEFAULT_USER_AGENT,
     "Referer": "https://flk.npc.gov.cn/",
     "Accept": "application/json, text/plain, */*",
 }
