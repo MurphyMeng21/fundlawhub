@@ -64,7 +64,7 @@ BASE_URL = "https://flk.npc.gov.cn"
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 npc-law-db/1.0"
+        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 cn-law-hub/1.0"
     ),
     "Referer": "https://flk.npc.gov.cn/",
     "Accept": "application/json, text/plain, */*",

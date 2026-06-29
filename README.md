@@ -1,8 +1,8 @@
-# NPC Law DB Skill
+# CN Law Hub
 
-[![GitHub](https://img.shields.io/badge/GitHub-ZongziForu%2Fnpc--law--db-blue)](https://github.com/ZongziForu/npc-law-db)
+[![GitHub](https://img.shields.io/badge/GitHub-ZongziForu%2Fcn--law--hub-blue)](https://github.com/ZongziForu/cn-law-hub)
 
-A Claude Code / Kimi Agent skill for accessing three Chinese legal databases:
+A Claude Code / Kimi Agent / Codex skill for accessing three Chinese legal databases:
 
 1. **国家法律法规数据库 (NPC)** — `flk.npc.gov.cn`
 2. **国家规章库 (Gov Rules)** — `gov.cn/zhengce/xxgk/gjgzk/`
@@ -10,7 +10,7 @@ A Claude Code / Kimi Agent skill for accessing three Chinese legal databases:
 
 Search, browse, download, and classify Chinese legal documents — including constitutional laws, statutes, administrative regulations, local regulations, judicial interpretations, supervisory regulations, State Council rules, and international treaties.
 
-> **中文**：这是一个用于访问中国三大法律数据库的 Claude Code / Kimi Agent skill。支持搜索、浏览、下载和分类中国法律文件，包括宪法、法律、行政法规、地方性法规、司法解释、监察法规、国家规章以及国际条约。
+> **中文**：这是一个用于访问中国三大法律数据库的 Claude Code / Kimi Agent / Codex skill。支持搜索、浏览、下载和分类中国法律文件，包括宪法、法律、行政法规、地方性法规、司法解释、监察法规、国家规章以及国际条约。
 
 ---
 
@@ -211,7 +211,7 @@ classify_by_authority("广州市人民代表大会常务委员会")
 ### 文件结构
 
 ```
-npc-law-db/
+cn-law-hub/
 ├── SKILL.md                      # 给 agent 看的 skill 主文档
 ├── README.md                     # 本文件
 ├── requirements.txt              # Python 依赖
@@ -231,6 +231,10 @@ npc-law-db/
     ├── kimi_bridge_adapter.md    # Claude Code / Kimi Agent 适配
     └── codex_adapter.md          # Codex Chrome 插件适配
 ```
+
+### 致谢
+
+国家规章库（`scripts/gov_rules_crawler.py`）和外交条约库（`scripts/treaty_crawler.py`）的实现参考了 [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified)。本项目的相关代码根据其思路进行了适配，并针对实际站点进行了验证，未机械照搬。
 
 ### 免责声明
 
@@ -435,7 +439,7 @@ See [`references/batch_collection.md`](references/batch_collection.md).
 ### File Structure
 
 ```
-npc-law-db/
+cn-law-hub/
 ├── SKILL.md                      # Main skill doc for agents
 ├── README.md                     # This file
 ├── requirements.txt              # Python dependencies
@@ -455,6 +459,10 @@ npc-law-db/
     ├── kimi_bridge_adapter.md    # Claude Code / Kimi Agent adapter
     └── codex_adapter.md          # Codex Chrome plugin adapter
 ```
+
+### Acknowledgments
+
+The Gov Rules (`scripts/gov_rules_crawler.py`) and Treaty (`scripts/treaty_crawler.py`) implementations were informed by the reference project [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified). The code here was adapted to fit the local architecture and verified against the live sites, not copied mechanically.
 
 ### Disclaimer
 

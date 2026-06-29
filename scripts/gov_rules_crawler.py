@@ -43,7 +43,7 @@ DEFAULT_CATEGORIES = ["部门规章", "地方政府规章"]
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 npc-law-db/1.0"
+        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 cn-law-hub/1.0"
     ),
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
@@ -90,7 +90,7 @@ class AthenaAuth:
         return {
             "User-Agent": (
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 npc-law-db/1.0"
+                "(KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 cn-law-hub/1.0"
             ),
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "Content-Type": "application/json;charset=UTF-8",
@@ -143,7 +143,7 @@ def parse_detail_page(detail_url: str, timeout: int = 30) -> dict:
     resp = http_request("GET", detail_url, headers={
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 npc-law-db/1.0"
+            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 cn-law-hub/1.0"
         ),
         "Accept": "text/html",
     }, timeout=timeout)
@@ -169,7 +169,7 @@ def download_file(url: str, path: Path, timeout: int = 60) -> Path:
     resp = http_request("GET", url, headers={
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 npc-law-db/1.0"
+            "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 cn-law-hub/1.0"
         ),
     }, timeout=timeout)
     final_path = unique_path(path)

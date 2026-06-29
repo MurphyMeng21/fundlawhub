@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Shared utilities for npc-law-db scripts.
+Shared utilities for cn-law-hub scripts.
 
 Provides: cache, rate limiting, HTTP client, file I/O, text utilities.
 Used by: download.py, treaty_crawler.py, gov_rules_crawler.py, article_search.py

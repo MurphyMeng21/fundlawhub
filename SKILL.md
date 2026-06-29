@@ -1,5 +1,5 @@
 ---
-name: npc-law-db
+name: cn-law-hub
 description: Access and retrieve laws, regulations, rules, and treaties from three Chinese legal databases. Use when the user needs to search, browse, download, or extract Chinese legal documents from the National Laws and Regulations Database (flk.npc.gov.cn), the State Council Rules Database (gov.cn), or the Ministry of Foreign Affairs Treaty Database (treaty.mfa.gov.cn). Covers searching by title/content, filtering by status/category, pagination, sorting, batch download, single document download, and article-level keyword extraction. Supports multi-environment browser automation (Kimi native, Claude Code via kimi-bridge, Codex).
 ---
 
@@ -535,4 +535,10 @@ python scripts/treaty_crawler.py --collections 全部 --size 200 --rate-limit ad
 | `scripts/gov_rules_crawler.py` | Gov.cn rules database | `--search`, `--categories`, `--size`, `--download`, `--info` | `gov_rules_output/` |
 | `scripts/treaty_crawler.py` | MFA treaty database | `--search`, `--collections`, `--size`, `--download`, `--info` | `treaty_output/` |
 | `scripts/region_classifier.py` | Province/city classification | `--classify`, `--matrix` | JSON/CSV |
+
+---
+
+## Attribution
+
+The Gov Rules (`scripts/gov_rules_crawler.py`) and Treaty (`scripts/treaty_crawler.py`) implementations were informed by the reference project [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified). The code in this skill was adapted to fit the local architecture and verified against the live sites, not copied mechanically.
 
