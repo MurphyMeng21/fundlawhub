@@ -540,5 +540,5 @@ python scripts/treaty_crawler.py --collections 全部 --size 200 --rate-limit ad
 
 ## Attribution
 
-The Gov Rules (`scripts/gov_rules_crawler.py`) and Treaty (`scripts/treaty_crawler.py`) implementations were informed by the reference project [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified). The code in this skill was adapted to fit the local architecture and verified against the live sites, not copied mechanically.
+Special thanks to [Li2zon3](https://github.com/Li2zon3) for the [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified) project. Its design was a huge help in building the Gov Rules (`scripts/gov_rules_crawler.py`) and Treaty (`scripts/treaty_crawler.py`) implementations.
 

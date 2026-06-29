@@ -234,7 +234,7 @@ cn-law-hub/
 
 ### 致谢
 
-国家规章库（`scripts/gov_rules_crawler.py`）和外交条约库（`scripts/treaty_crawler.py`）的实现参考了 [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified)。本项目的相关代码根据其思路进行了适配，并针对实际站点进行了验证，未机械照搬。
+特别感谢 [Li2zon3](https://github.com/Li2zon3) 的 [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified) 项目，国家规章库（`scripts/gov_rules_crawler.py`）和外交条约库（`scripts/treaty_crawler.py`）的实现大量参考了其中的思路与方案，帮了很大的忙。
 
 ### 使用倡议
 
@@ -466,7 +466,7 @@ cn-law-hub/
 
 ### Acknowledgments
 
-The Gov Rules (`scripts/gov_rules_crawler.py`) and Treaty (`scripts/treaty_crawler.py`) implementations were informed by the reference project [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified). The code here was adapted to fit the local architecture and verified against the live sites, not copied mechanically.
+Special thanks to [Li2zon3](https://github.com/Li2zon3) for the [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified) project. Its design was a huge help in building the Gov Rules (`scripts/gov_rules_crawler.py`) and Treaty (`scripts/treaty_crawler.py`) implementations.
 
 ### Usage Guidelines
 
