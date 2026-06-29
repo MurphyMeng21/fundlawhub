@@ -236,6 +236,10 @@ cn-law-hub/
 
 国家规章库（`scripts/gov_rules_crawler.py`）和外交条约库（`scripts/treaty_crawler.py`）的实现参考了 [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified)。本项目的相关代码根据其思路进行了适配，并针对实际站点进行了验证，未机械照搬。
 
+### 使用倡议
+
+官方公共法律数据库的维护不易，请大家在使用时保持克制，尽量避免大量高频请求。本项目在批量采集、搜索和下载等功能中已经内置了不同强度的智能限速（小任务关闭限速、中等任务固定限速、大任务自适应限速），希望在不明显影响使用体验的前提下，尽量减少对目标网站造成的负担。请珍惜并合理使用这些公开资源。
+
 ### 免责声明
 
 本工具仅用于学习和研究目的。请遵守 `flk.npc.gov.cn`、`gov.cn` 和 `treaty.mfa.gov.cn` 的使用条款，不要高频请求或用于商业用途。
@@ -463,6 +467,10 @@ cn-law-hub/
 ### Acknowledgments
 
 The Gov Rules (`scripts/gov_rules_crawler.py`) and Treaty (`scripts/treaty_crawler.py`) implementations were informed by the reference project [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified). The code here was adapted to fit the local architecture and verified against the live sites, not copied mechanically.
+
+### Usage Guidelines
+
+Maintaining official public legal databases takes effort. Please use this tool responsibly and avoid large volumes of high-frequency requests. The skill includes built-in smart rate limiting across batch collection, search, and download features (off for small tasks, fixed-rate for medium tasks, adaptive for large tasks) so that normal use remains convenient while minimizing load on the target sites. Please use these public resources carefully and sparingly.
 
 ### Disclaimer
 
