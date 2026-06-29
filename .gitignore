@@ -12,3 +12,9 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Meta tooling (not part of the skill)
+.claude/skills/skill-creator/
+
+# Eval workspace output
+../npc-law-db-workspace/
