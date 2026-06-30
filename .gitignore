@@ -16,5 +16,5 @@ Thumbs.db
 # Meta tooling (not part of the skill)
 .claude/skills/skill-creator/
 
-# Eval workspace output
-../npc-law-db-workspace/
+# Eval workspace output (sibling directory, kept out of repo)
+cn-law-hub-workspace/

@@ -1,6 +1,7 @@
 ---
 name: cn-law-hub
-description: Access and retrieve laws, regulations, rules, and treaties from three Chinese legal databases. Use when the user needs to search, browse, download, or extract Chinese legal documents from the National Laws and Regulations Database (flk.npc.gov.cn), the State Council Rules Database (gov.cn), or the Ministry of Foreign Affairs Treaty Database (treaty.mfa.gov.cn). Covers searching by title/content, filtering by status/category, pagination, sorting, batch download, single document download, and article-level keyword extraction. Supports multi-environment browser automation (Kimi native, Claude Code via kimi-bridge, Codex).
+description: >-
+  用于查询、检索、核验、下载、导出、批量采集中国官方法律法规、规章、条约和具体法条。Use this skill aggressively when the user asks to 查法律、查法规、查条例、查规章、查条约、查法条、查第几条、找法律依据、引用法律依据、核验现行有效、判断是否废止/已修改/尚未生效、下载法规全文、导出法规目录、批量下载法规文件、按关键词检索具体法条、展开法条分析，或在中国法律咨询、案例分析、合规审查、合同审查、劳动争议、行政法分析、公司合规、数据合规、政策研究中需要调用、核验或引用中国现行有效法律法规原文作为依据。Trigger also when phrases such as 依法、依规、依照法律规定、法律法规 imply a need to verify specific statutory authority or article-level text. Covers 国家法律法规数据库 (flk.npc.gov.cn), 国家规章库 (gov.cn), 外交条约库 (treaty.mfa.gov.cn). Supports 标题/正文检索, 精确/模糊检索, 时效性过滤, 分类过滤, 分页, 排序, 单篇下载, 批量下载, 法条级抽取, 地区/制定机关分类, and browser fallback. Trigger when the answer may depend on current effective Chinese statutes, regulations, rules, treaties, article text, official document status, or official source attribution. Do not use for purely general legal theory, generic writing, or legal reasoning that does not require retrieving or verifying official Chinese legal documents.
 ---
 
 # Legal Databases Overview
@@ -331,5 +332,4 @@ All crawler scripts support `--no-cache` and `--rate-limit {off|fixed|adaptive}`
 
 ## Attribution
 
-Special thanks to [Li2zon3](https://github.com/Li2zon3) for the [`law-crawler-unified`](https://github.com/Li2zon3/law-crawler-unified) project. Its design was a huge help in building the Gov Rules (`scripts/gov_rules_crawler.py`) and Treaty (`scripts/treaty_crawler.py`) implementations.
-
+Special thanks to [Li2zon3]for the [`law-crawler-unified`]project. 
