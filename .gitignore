@@ -18,3 +18,9 @@ Thumbs.db
 
 # Eval workspace output (sibling directory, kept out of repo)
 cn-law-hub-workspace/
+
+# Eval results (not part of the skill)
+evals/
+
+# R / editor history
+.Rhistory
