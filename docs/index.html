@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中国法律法规检索系统</title>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+<style>
+/* ===== Reset & Base ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --c-bg:#f8f9fb;--c-surface:#fff;--c-border:#e2e5ea;--c-text:#1a1f2e;
+  --c-text2:#5f6b7a;--c-text3:#8e99a8;--c-accent:#1a56db;--c-accent-light:#e8effc;
+  --c-green:#0d7d4a;--c-green-bg:#e6f4ed;--c-orange:#b85c00;--c-orange-bg:#fef3e5;
+  --c-red:#c02020;--c-yellow:#856404;--c-yellow-bg:#fff8e1;
+  --sidebar-w:260px;--header-h:60px;--radius:8px;--shadow:0 1px 3px rgba(0,0,0,.08);
+  --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+body{font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-height:1.6;overflow:hidden;height:100vh}
+a{color:var(--c-accent);text-decoration:none}
+button{cursor:pointer;border:none;background:none;font:inherit;color:inherit}
+input{font:inherit}
+
+/* ===== Layout ===== */
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* ===== Header ===== */
+#header{height:var(--header-h);background:var(--c-surface);border-bottom:1px solid var(--c-border);display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;z-index:10}
+#header h1{font-size:18px;font-weight:700;white-space:nowrap;color:var(--c-accent)}
+#search-wrap{flex:1;max-width:560px;position:relative}
+#search-input{width:100%;height:38px;padding:0 40px 0 14px;border:1px solid var(--c-border);border-radius:var(--radius);font-size:14px;outline:none;transition:border-color .2s;background:var(--c-bg)}
+#search-input:focus{border-color:var(--c-accent);background:var(--c-surface)}
+#search-input::placeholder{color:var(--c-text3)}
+#search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--c-text3);padding:4px 8px;display:none}
+#search-clear.visible{display:block}
+#header-stats{font-size:13px;color:var(--c-text2);white-space:nowrap}
+
+/* ===== Main Layout ===== */
+#main-layout{display:flex;flex:1;overflow:hidden}
+
+/* ===== Sidebar ===== */
+#sidebar{width:var(--sidebar-w);background:var(--c-surface);border-right:1px solid var(--c-border);overflow-y:auto;flex-shrink:0;padding:12px 0}
+#sidebar h2{font-size:13px;font-weight:600;color:var(--c-text3);padding:8px 16px;text-transform:uppercase;letter-spacing:.5px}
+.cat-item{display:flex;align-items:center;padding:8px 16px;cursor:pointer;font-size:14px;transition:background .15s;gap:8px;border-left:3px solid transparent}
+.cat-item:hover{background:var(--c-accent-light)}
+.cat-item.active{background:var(--c-accent-light);border-left-color:var(--c-accent);font-weight:600;color:var(--c-accent)}
+.cat-name{flex:1}
+.cat-count{font-size:12px;color:var(--c-text3);background:var(--c-bg);padding:1px 8px;border-radius:10px;min-width:28px;text-align:center}
+.cat-item.active .cat-count{background:var(--c-accent);color:#fff}
+
+/* ===== Content Area ===== */
+#content{flex:1;overflow-y:auto;padding:20px}
+#law-list{display:flex;flex-direction:column;gap:12px}
+#law-detail{display:none}
+#law-detail.active{display:block}
+
+/* ===== Law Card ===== */
+.law-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);padding:16px 20px;cursor:pointer;transition:box-shadow .2s,border-color .2s}
+.law-card:hover{border-color:var(--c-accent);box-shadow:var(--shadow)}
+.law-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.law-card-title{font-size:16px;font-weight:600;color:var(--c-text);line-height:1.4}
+.law-card-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--c-text2)}
+.law-card-meta span{display:inline-flex;align-items:center;gap:4px}
+.law-card-preview{font-size:13px;color:var(--c-text3);margin-top:8px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:500;white-space:nowrap}
+.badge-level{background:var(--c-accent-light);color:var(--c-accent)}
+.badge-status-current{background:var(--c-green-bg);color:var(--c-green)}
+.badge-status-abolish{background:#fce4e4;color:var(--c-red)}
+.badge-status-amend{background:var(--c-orange-bg);color:var(--c-orange)}
+.badge-status-pending{background:var(--c-yellow-bg);color:var(--c-yellow)}
+.sep{color:var(--c-border)}
+
+/* ===== Detail View ===== */
+#law-detail{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);padding:24px 28px}
+.detail-back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--c-accent);margin-bottom:20px;padding:6px 12px;border-radius:var(--radius);transition:background .15s}
+.detail-back:hover{background:var(--c-accent-light)}
+.detail-title{font-size:22px;font-weight:700;margin-bottom:12px;line-height:1.4}
+.detail-meta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;font-size:14px;color:var(--c-text2)}
+.detail-meta strong{color:var(--c-text)}
+.detail-full-text{font-size:15px;line-height:1.9;white-space:pre-wrap;word-break:break-word;max-height:70vh;overflow-y:auto;padding-right:8px;border-top:1px solid var(--c-border);padding-top:20px;margin-top:12px}
+.detail-full-text h1,.detail-full-text h2,.detail-full-text h3{font-size:16px;margin:16px 0 8px}
+.detail-warning{background:var(--c-yellow-bg);color:var(--c-yellow);padding:12px 16px;border-radius:var(--radius);font-size:14px;margin-bottom:16px}
+
+/* ===== No Results / Loading / Empty ===== */
+#no-results{text-align:center;padding:60px 20px;color:var(--c-text3)}
+#no-results .icon{font-size:48px;margin-bottom:12px}
+#no-results h3{font-size:18px;margin-bottom:6px;color:var(--c-text2)}
+#loading{text-align:center;padding:60px 20px;color:var(--c-text3);font-size:15px}
+.spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--c-border);border-top-color:var(--c-accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== Search Highlight ===== */
+mark.highlight{background:#fde68a;color:inherit;padding:0 2px;border-radius:2px}
+
+/* ===== Mobile Overlay ===== */
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:49}
+#sidebar-overlay.open{display:block}
+#menu-btn{display:none;font-size:22px;padding:4px 8px}
+
+/* ===== Responsive ===== */
+@media (max-width:768px){
+  #header h1{font-size:15px}
+  #header-stats{display:none}
+  #menu-btn{display:block}
+  #sidebar{position:fixed;left:calc(-1*var(--sidebar-w));top:var(--header-h);bottom:0;z-index:50;transition:left .3s;box-shadow:2px 0 8px rgba(0,0,0,.1)}
+  #sidebar.open{left:0}
+  #sidebar-overlay.open{display:block}
+  #content{padding:12px}
+  .law-card{padding:12px 14px}
+  .law-card-title{font-size:14px}
+  #law-detail{padding:16px}
+  .detail-title{font-size:18px}
+  .detail-full-text{font-size:14px;max-height:60vh}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <header id="header">
+    <button id="menu-btn" aria-label="菜单">☰</button>
+    <h1>中国法律法规检索</h1>
+    <div id="search-wrap">
+      <input type="text" id="search-input" placeholder="搜索法规标题、全文、发布机构..." autocomplete="off">
+      <button id="search-clear" aria-label="清除">✕</button>
+    </div>
+    <div id="header-stats">共 <strong id="total-count">0</strong> 部</div>
+  </header>
+
+  <!-- Main -->
+  <div id="main-layout">
+    <div id="sidebar-overlay"></div>
+    <aside id="sidebar">
+      <h2>板块分类</h2>
+      <nav id="category-tree"></nav>
+    </aside>
+    <main id="content">
+      <div id="loading"><div class="spinner"></div><div>加载法规数据中...</div></div>
+      <div id="law-list"></div>
+      <div id="law-detail"></div>
+      <div id="no-results" style="display:none">
+        <div class="icon">🔍</div>
+        <h3>未找到匹配的法规</h3>
+        <div>请调整搜索条件或关键词</div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ===== State =====
+  const state = {
+    laws: [],
+    filteredLaws: [],
+    activeCategory: 'all',
+    searchQuery: '',
+    fuse: null,
+    expandedId: null,
+  };
+
+  // ===== DOM Refs =====
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+  const searchInput = $('#search-input');
+  const searchClear = $('#search-clear');
+  const totalCount = $('#total-count');
+  const categoryTree = $('#category-tree');
+  const lawList = $('#law-list');
+  const lawDetail = $('#law-detail');
+  const noResults = $('#no-results');
+  const loadingEl = $('#loading');
+  const menuBtn = $('#menu-btn');
+  const sidebar = $('#sidebar');
+  const overlay = $('#sidebar-overlay');
+  const headerStats = $('#header-stats');
+
+  // ===== Category Config =====
+  const CAT_DISPLAY = {
+    '基金运作':'基金运作与监管','证券交易':'证券交易合规','反洗钱':'反洗钱与CRS',
+    '广告竞争':'广告与市场竞争','税务':'税务','劳动':'劳动人事',
+    '跨境':'跨境业务','基础法律':'基础法律与知识产权','量化交易':'程序化/量化交易',
+    '交易所':'交易所规则'
+  };
+  const CAT_ORDER = ['基金运作','证券交易','反洗钱','广告竞争','税务','劳动','跨境','基础法律','量化交易','交易所'];
+
+  // ===== Data Loading =====
+  async function loadData() {
+    try {
+      const resp = await fetch('data/laws.json');
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      state.laws = await resp.json();
+      state.filteredLaws = [...state.laws];
+      initSearch();
+      renderAll();
+    } catch (err) {
+      loadingEl.innerHTML = `<div style="padding:40px;color:var(--c-red)">❌ 数据加载失败：${err.message}<br><small>请确认 data/laws.json 文件存在</small></div>`;
+    }
+  }
+
+  // ===== Fuse.js Search =====
+  function initSearch() {
+    const options = {
+      keys: [
+        { name: 'title', weight: 0.5 },
+        { name: 'authority', weight: 0.15 },
+        { name: 'full_text', weight: 0.25 },
+        { name: 'level', weight: 0.05 },
+        { name: 'status_str', weight: 0.05 },
+      ],
+      threshold: 0.35,
+      distance: 100,
+      minMatchCharLength: 1,
+      includeScore: true,
+      includeMatches: true,
+      ignoreLocation: true,
+      ignoreFieldNorm: true,
+    };
+    state.fuse = new Fuse(state.laws, options);
+  }
+
+  function doSearch() {
+    let results;
+    if (state.searchQuery.trim()) {
+      const fuseResults = state.fuse.search(state.searchQuery.trim());
+      results = fuseResults.map(r => {
+        // Attach match indices for highlighting
+        r.item._matches = r.matches || [];
+        return r.item;
+      });
+    } else {
+      results = [...state.laws];
+    }
+
+    if (state.activeCategory !== 'all') {
+      results = results.filter(law =>
+        (law.categories || []).includes(state.activeCategory)
+      );
+    }
+
+    state.filteredLaws = results;
+    renderLawList();
+    updateStats();
+  }
+
+  // ===== Rendering =====
+  function renderAll() {
+    renderCategoryTree();
+    renderLawList();
+    updateStats();
+  }
+
+  function renderCategoryTree() {
+    // Count per category
+    const counts = {};
+    counts['all'] = state.laws.length;
+    for (const law of state.laws) {
+      for (const cat of (law.categories || [])) {
+        counts[cat] = (counts[cat] || 0) + 1;
+      }
+    }
+
+    let html = '<ul style="list-style:none">';
+    // "All" item
+    html += `<li class="cat-item${state.activeCategory === 'all' ? ' active' : ''}" data-cat="all">
+      <span class="cat-name">全部法规</span><span class="cat-count">${counts['all']||0}</span>
+    </li>`;
+
+    for (const cat of CAT_ORDER) {
+      const count = counts[cat];
+      if (!count) continue;
+      const display = CAT_DISPLAY[cat] || cat;
+      html += `<li class="cat-item${state.activeCategory === cat ? ' active' : ''}" data-cat="${cat}">
+        <span class="cat-name">${display}</span><span class="cat-count">${count}</span>
+      </li>`;
+    }
+    html += '</ul>';
+    categoryTree.innerHTML = html;
+
+    // Click handlers
+    categoryTree.querySelectorAll('.cat-item').forEach(el => {
+      el.addEventListener('click', () => {
+        state.activeCategory = el.dataset.cat;
+        state.expandedId = null;
+        lawDetail.classList.remove('active');
+        lawList.style.display = '';
+        doSearch();
+        renderCategoryTree();
+        // Close mobile sidebar
+        closeSidebar();
+      });
+    });
+  }
+
+  function renderLawList() {
+    loadingEl.style.display = 'none';
+    const laws = state.filteredLaws;
+
+    if (laws.length === 0) {
+      lawList.innerHTML = '';
+      lawList.style.display = 'none';
+      noResults.style.display = 'block';
+      return;
+    }
+    noResults.style.display = 'none';
+    lawList.style.display = '';
+
+    let html = '';
+    for (const law of laws) {
+      const pub = law.publish_date ? law.publish_date : '—';
+      const eff = law.effective_date ? law.effective_date : '—';
+      const levelBadge = law.level ? `<span class="badge badge-level">${esc(law.level)}</span>` : '';
+      const statusClass = law.status_str === '现行有效' ? 'badge-status-current'
+        : law.status_str === '已废止' ? 'badge-status-abolish'
+        : law.status_str === '已修改' ? 'badge-status-amend'
+        : 'badge-status-pending';
+      const statusBadge = law.status_str ? `<span class="badge ${statusClass}">${esc(law.status_str)}</span>` : '';
+      const authority = law.authority ? esc(law.authority) : '';
+      const preview = law.full_text_preview ? esc(truncate(law.full_text_preview, 200)) : '';
+      const warning = law.full_text_error ? ' <span style="color:var(--c-yellow)" title="原文加载异常">⚠️</span>' : '';
+      const catLabel = (law.category_display && law.category_display.length) ? esc(law.category_display[0]) : '';
+
+      html += `<div class="law-card" data-id="${esc(law.id)}">
+        <div class="law-card-header">
+          <div>
+            <div class="law-card-title">${esc(law.title)}${warning}</div>
+            <div class="law-card-meta">
+              ${levelBadge} ${statusBadge}
+              ${authority ? `<span>${authority}</span>` : ''}
+              <span class="sep">|</span><span>发布 ${pub}</span>
+              ${law.effective_date ? `<span class="sep">|</span><span>施行 ${eff}</span>` : ''}
+              ${catLabel ? `<span class="sep">|</span><span>${catLabel}</span>` : ''}
+            </div>
+          </div>
+        </div>
+        ${preview ? `<div class="law-card-preview">${preview}</div>` : ''}
+      </div>`;
+    }
+    lawList.innerHTML = html;
+
+    // Click -> detail
+    lawList.querySelectorAll('.law-card').forEach(card => {
+      card.addEventListener('click', () => showDetail(card.dataset.id));
+    });
+  }
+
+  function showDetail(id) {
+    const law = state.laws.find(l => l.id === id);
+    if (!law) return;
+
+    state.expandedId = id;
+    lawList.style.display = 'none';
+    noResults.style.display = 'none';
+    lawDetail.classList.add('active');
+
+    const pub = law.publish_date || '—';
+    const eff = law.effective_date || '施行日期暂缺';
+    const statusClass = law.status_str === '现行有效' ? 'badge-status-current'
+      : law.status_str === '已废止' ? 'badge-status-abolish'
+      : law.status_str === '已修改' ? 'badge-status-amend'
+      : 'badge-status-pending';
+
+    const fullText = law.full_text_error
+      ? '<div class="detail-warning">⚠️ 原文加载异常，请参考官方数据库原文。</div>'
+      : formatFullText(law.full_text, state.searchQuery);
+
+    const catDisplay = (law.category_display || []).join('、') || '—';
+
+    lawDetail.innerHTML = `
+      <button class="detail-back" onclick="history.back()">← 返回列表</button>
+      <div class="detail-title">${esc(law.title)}</div>
+      <div class="detail-meta">
+        ${law.level ? `<span><strong>层级：</strong>${esc(law.level)}</span>` : ''}
+        <span><strong>状态：</strong><span class="badge ${statusClass}">${esc(law.status_str||'—')}</span></span>
+        ${law.authority ? `<span><strong>发布机构：</strong>${esc(law.authority)}</span>` : ''}
+        <span><strong>发布日期：</strong>${pub}</span>
+        <span><strong>施行日期：</strong>${eff}</span>
+        <span><strong>所属板块：</strong>${catDisplay}</span>
+        ${law.note ? `<span style="color:var(--c-text3);font-size:13px">📝 ${esc(law.note)}</span>` : ''}
+      </div>
+      <div class="detail-full-text">${fullText}</div>
+    `;
+
+    // Wire back button
+    lawDetail.querySelector('.detail-back').addEventListener('click', (e) => {
+      e.preventDefault();
+      hideDetail();
+    });
+
+    // Scroll detail to top
+    lawDetail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('#content').scrollTop = 0;
+  }
+
+  function hideDetail() {
+    state.expandedId = null;
+    lawDetail.classList.remove('active');
+    lawDetail.innerHTML = '';
+    lawList.style.display = '';
+    renderLawList();
+  }
+
+  function formatFullText(text, query) {
+    if (!text) return '<div style="color:var(--c-text3)">暂无全文</div>';
+    let html = esc(text);
+
+    // Highlight search terms
+    if (query && query.trim()) {
+      const terms = query.trim().split(/\s+/).filter(t => t.length > 0);
+      for (const term of terms) {
+        const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escaped})`, 'gi');
+        html = html.replace(regex, '<mark class="highlight">$1</mark>');
+      }
+    }
+
+    // Convert markdown-style headers
+    html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+    return html;
+  }
+
+  function updateStats() {
+    totalCount.textContent = state.filteredLaws.length;
+  }
+
+  // ===== Utilities =====
+  function esc(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function truncate(str, maxLen) {
+    if (!str) return '';
+    return str.length > maxLen ? str.slice(0, maxLen) + '…' : str;
+  }
+
+  // ===== Events =====
+  let searchTimer;
+  searchInput.addEventListener('input', () => {
+    state.searchQuery = searchInput.value;
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      doSearch();
+      if (state.expandedId) hideDetail();
+    }, 250);
+    searchClear.classList.toggle('visible', state.searchQuery.length > 0);
+  });
+
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    state.searchQuery = '';
+    searchClear.classList.remove('visible');
+    doSearch();
+    if (state.expandedId) hideDetail();
+    searchInput.focus();
+  });
+
+  // Keyboard shortcut: / to focus search
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    if (e.key === 'Escape') {
+      if (state.expandedId) {
+        hideDetail();
+      } else if (document.activeElement === searchInput) {
+        searchInput.blur();
+      }
+    }
+  });
+
+  // Mobile sidebar
+  menuBtn.addEventListener('click', toggleSidebar);
+  overlay.addEventListener('click', closeSidebar);
+
+  function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  }
+
+  // ===== Init =====
+  loadData();
+});
+</script>
+</body>
+</html>
