@@ -332,4 +332,4 @@ All crawler scripts support `--no-cache` and `--rate-limit {off|fixed|adaptive}`
 
 ## Attribution
 
-Special thanks to [Li2zon3]for the [`law-crawler-unified`]project. 
+This project builds on official legal databases maintained by the NPC Standing Committee, State Council, and Ministry of Foreign Affairs. Special thanks to the open-source community for tooling and reference implementations that made this project possible.

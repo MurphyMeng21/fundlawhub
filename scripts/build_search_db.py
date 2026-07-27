@@ -17,7 +17,7 @@ OBSIDIAN_BASE = Path("/Users/yan/Desktop/for_claude/obsidian/01-法务知识库/
 NPC_META = OBSIDIAN_BASE / "_data" / "npc_metadata.json"
 CSRC_META = OBSIDIAN_BASE / "_data" / "csrc_metadata.json"
 MD_ROOT = OBSIDIAN_BASE / "_data" / "法规原文"
-OUTPUT_DIR = PROJECT_DIR / "web" / "data"
+OUTPUT_DIR = PROJECT_DIR / "docs" / "data"
 OUTPUT_FILE = OUTPUT_DIR / "laws.json"
 
 # --- Category mapping: NPC category key -> display name, dir name ---
@@ -30,8 +30,7 @@ CATEGORY_CONFIG = {
     "劳动":     {"display": "劳动人事", "dir": "劳动人事"},
     "跨境":     {"display": "跨境业务", "dir": "跨境"},
     "基础法律": {"display": "基础法律与知识产权", "dir": "基础法律"},
-    "量化交易": {"display": "程序化/量化交易", "dir": "量化交易"},
-    "交易所":   {"display": "交易所规则", "dir": "交易所"},
+    "量化交易": {"display": "程序化/量化交易与异常交易监控", "dir": "量化交易"},
 }
 
 LEVEL_ORDER = {"法律": 1, "行政法规": 2, "司法解释": 3, "司法文件": 4, "部门规章": 5, "自律规则": 6, "行政规范": 7}
