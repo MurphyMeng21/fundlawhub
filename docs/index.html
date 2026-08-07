@@ -272,7 +272,7 @@ function bindLawEvents() {
 window._casesLoaded = false;
 function initCaseModule() { if (!window._casesLoaded) { window._casesLoaded = true; loadCaseModule(); } }
 
-const caseState = { cases: [], filtered: [], activeCat: 'all', activeSev: 'all', activeCh: 'all', query: '', fuse: null, expandedId: null, fullTexts: {} };
+const caseState = { cases: [], filtered: [], activeCat: 'all', activeTag: 'all', activeSrc: 'all', activeSev: 'all', query: '', fuse: null, expandedId: null, fullTexts: {} };
 
 async function loadCaseModule() {
   const content = $('#content-cases');
@@ -280,7 +280,7 @@ async function loadCaseModule() {
     const [r1, r2] = await Promise.all([fetch('data/cases.json'), fetch('data/cases_full.json')]);
     caseState.cases = await r1.json(); caseState.fullTexts = await r2.json(); caseState.filtered = [...caseState.cases];
     caseState.fuse = new Fuse(caseState.cases, {
-      keys: [{name:'name',weight:0.4},{name:'case_no',weight:0.2},{name:'penalty',weight:0.15},{name:'categories',weight:0.15},{name:'full_text_preview',weight:0.1}],
+      keys: [{name:'party',weight:0.4},{name:'case_no',weight:0.2},{name:'penalty',weight:0.15},{name:'tags',weight:0.15},{name:'content_preview',weight:0.1}],
       threshold: 0.35, distance: 100, minMatchCharLength: 1, includeScore: true, includeMatches: true, ignoreLocation: true, ignoreFieldNorm: true
     });
     renderCaseSidebar(); renderCaseList(caseState.cases); bindCaseEvents();
@@ -288,25 +288,69 @@ async function loadCaseModule() {
   } catch(e) { content.innerHTML = `<div class="empty-state"><div class="icon">❌</div><h3>数据加载失败</h3><div>${esc(e.message)}</div></div>`; }
 }
 
+// Config
+const L1_CATS = ['公司治理与登记备案','募集销售与投资者适当性','产品运作与合同一致性','程序化交易与算法管理','异常交易与市场操纵','网下打新'];
+const L2_LABELS = {
+  '公司治理与登记备案': ['登记备案','内控合规','人员场所','虚假材料','信息报送','不配合监管','违规减持'],
+  '募集销售与投资者适当性': ['合格投资者','销售违规','承诺收益','公开宣传','非法集资'],
+  '产品运作与合同一致性': ['勤勉义务','信息披露','关联交易','挪用侵占','投资运作违规','估值违规','期货与资管业务','风险指标违规','资金池混同','募新还旧'],
+  '程序化交易与算法管理': ['程序化交易管理'],
+  '异常交易与市场操纵': ['异常交易行为','市场操纵内幕交易'],
+  '网下打新': ['网下打新违规'],
+};
+
 function renderCaseSidebar() {
-  const cats = {'all': caseState.cases.length}, sevs = {'all': caseState.cases.length}, chs = {'all': caseState.cases.length};
-  for (const c of caseState.cases) { for (const cat of (c.categories||[])) cats[cat] = (cats[cat]||0) + 1; sevs[c.severity] = (sevs[c.severity]||0) + 1; chs[c.channel] = (chs[c.channel]||0) + 1; }
-  let h = '<div class="sidebar-section"><div class="sidebar-title">违规类型</div>';
-  h += `<div class="filter-item${caseState.activeCat==='all'?' active':''}" data-cat="all"><span class="filter-name">全部</span><span class="filter-count">${cats.all}</span></div>`;
-  for (const [cat, n] of Object.entries(cats)) { if (cat === 'all') continue;
-    h += `<div class="filter-item${caseState.activeCat===cat?' active':''}" data-cat="${cat}"><span class="filter-name">${cat}</span><span class="filter-count">${n}</span></div>`; }
-  h += '</div><div class="sidebar-section"><div class="sidebar-title">处分级别</div>';
+  const srcs = {'all': caseState.cases.length};
+  const sevs = {'all': caseState.cases.length};
+  const l1counts = {'all': caseState.cases.length};
+  const l2counts = {};
+  for (const c of caseState.cases) {
+    const src = c.source || '其他'; srcs[src] = (srcs[src]||0) + 1;
+    sevs[c.severity] = (sevs[c.severity]||0) + 1;
+    const seen = new Set();
+    for (const tag of (c.tags||[])) {
+      const [l1,l2] = tag.split('/');
+      if (l1 && l2) {
+        l2counts[tag] = (l2counts[tag]||0) + 1;
+        if (!seen.has(l1)) { l1counts[l1] = (l1counts[l1]||0) + 1; seen.add(l1); }
+      }
+    }
+  }
+
+  let h = '<div class="sidebar-section"><div class="sidebar-title">处罚来源</div>';
+  h += `<div class="filter-item${caseState.activeSrc==='all'?' active':''}" data-src="all"><span class="filter-name">全部</span><span class="filter-count">${srcs.all}</span></div>`;
+  for (const [s,n] of Object.entries(srcs)) { if (s==='all') continue;
+    const short = s.includes('中基协')?'中基协':s.includes('证监会')?'证监会派出机构':s.length>6?s.slice(0,10)+'…':s;
+    h += `<div class="filter-item${caseState.activeSrc===s?' active':''}" data-src="${s}"><span class="filter-name">${short}</span><span class="filter-count">${n}</span></div>`; }
+  h += '</div>';
+
+  h += '<div class="sidebar-section"><div class="sidebar-title">违规类型</div>';
+  h += `<div class="filter-item${caseState.activeCat==='all'?' active':''}" data-cat="all"><span class="filter-name">全部</span><span class="filter-count">${l1counts.all}</span></div>`;
+  for (const l1 of L1_CATS) {
+    const n = l1counts[l1]||0; if (!n) continue;
+    const active = caseState.activeCat === l1;
+    h += `<div class="filter-item${active?' active':''}" data-cat="${l1}"><span class="filter-name">${l1}</span><span class="filter-count">${n}</span></div>`;
+    // Show sub-categories for active or "all"
+    if (active || caseState.activeCat === 'all') {
+      for (const l2 of (L2_LABELS[l1]||[])) {
+        const tag = `${l1}/${l2}`; const n2 = l2counts[tag]||0; if (!n2) continue;
+        h += `<div class="filter-item${caseState.activeTag===tag?' active':''}" data-tag="${tag}" style="padding-left:32px;font-size:12px"><span class="filter-name">└ ${l2}</span><span class="filter-count">${n2}</span></div>`;
+      }
+    }
+  }
+  h += '</div>';
+
+  h += '<div class="sidebar-section"><div class="sidebar-title">处分级别</div>';
   for (const [sev, n] of [['all',caseState.cases.length],['严重',sevs['严重']||0],['较重',sevs['较重']||0],['一般',sevs['一般']||0],['较轻',sevs['较轻']||0]]) {
     h += `<div class="filter-item${caseState.activeSev===sev?' active':''}" data-sev="${sev}"><span class="filter-name">${sev==='all'?'全部':sev}</span><span class="filter-count">${n}</span></div>`; }
-  h += '</div><div class="sidebar-section"><div class="sidebar-title">对象类型</div>';
-  for (const [ch, n] of [['all',caseState.cases.length],['scfjg',chs['scfjg']||0],['scfry',chs['scfry']||0]]) {
-    const label = ch === 'all' ? '全部' : ch === 'scfjg' ? '受处分机构' : '受处分人员';
-    h += `<div class="filter-item${caseState.activeCh===ch?' active':''}" data-ch="${ch}"><span class="filter-name">${label}</span><span class="filter-count">${n}</span></div>`; }
-  h += '</div>'; $('#sidebar-cases').innerHTML = h;
+  h += '</div>';
+
+  $('#sidebar-cases').innerHTML = h;
   $$('.filter-item', $('#sidebar-cases')).forEach(el => el.addEventListener('click', () => {
-    if (el.dataset.cat !== undefined) caseState.activeCat = el.dataset.cat;
+    if (el.dataset.src !== undefined) caseState.activeSrc = el.dataset.src;
+    if (el.dataset.cat !== undefined) { caseState.activeCat = el.dataset.cat; caseState.activeTag = 'all'; }
+    if (el.dataset.tag !== undefined) caseState.activeTag = el.dataset.tag;
     if (el.dataset.sev !== undefined) caseState.activeSev = el.dataset.sev;
-    if (el.dataset.ch !== undefined) caseState.activeCh = el.dataset.ch;
     caseState.expandedId = null; const dc = $('#content-cases .detail-container'); if (dc) { dc.classList.remove('active'); dc.innerHTML=''; }
     const lc = $('#content-cases .list-container'); if (lc) lc.style.display = '';
     doCaseSearch(); renderCaseSidebar();
@@ -317,17 +361,20 @@ function doCaseSearch() {
   let results;
   if (caseState.query.trim()) { const fr = caseState.fuse.search(caseState.query.trim()); results = fr.map(r => r.item); }
   else results = [...caseState.cases];
-  if (caseState.activeCat !== 'all') results = results.filter(c => (c.categories||[]).includes(caseState.activeCat));
+  if (caseState.activeSrc !== 'all') results = results.filter(c => (c.source||'') === caseState.activeSrc);
+  if (caseState.activeTag !== 'all') results = results.filter(c => (c.tags||[]).includes(caseState.activeTag));
+  else if (caseState.activeCat !== 'all') results = results.filter(c => (c.tags||[]).some(t => t.startsWith(caseState.activeCat+'/')));
   if (caseState.activeSev !== 'all') results = results.filter(c => c.severity === caseState.activeSev);
-  if (caseState.activeCh !== 'all') results = results.filter(c => c.channel === caseState.activeCh);
   caseState.filtered = results; renderCaseList(results); $('#total-count-cases').textContent = results.length;
 }
 
 function renderCaseList(cases) {
   const content = $('#content-cases'); content.innerHTML = '';
-  const sevs = {}; for (const c of cases) sevs[c.severity] = (sevs[c.severity]||0)+1;
+  const srcs = {}, sevs = {};
+  for (const c of cases) { sevs[c.severity] = (sevs[c.severity]||0)+1; srcs[c.source||'其他'] = (srcs[c.source||'其他']||0)+1; }
   let statsH = '<div class="stats-bar">';
   statsH += `<div class="stat-item">📊 共 ${cases.length} 条</div>`;
+  for (const [s,n] of Object.entries(srcs)) { if (n) statsH += `<div class="stat-item">${s.length>8?s.slice(0,8)+'…':s}: ${n}条</div>`; }
   for (const [s,n] of [['严重',sevs['严重']],['较重',sevs['较重']],['一般',sevs['一般']],['较轻',sevs['较轻']]]) if (n) statsH += `<div class="stat-item"><span class="badge sev-${s}">${s}</span> ${n}条</div>`;
   statsH += '</div>'; content.innerHTML = statsH;
   if (!cases.length) { content.innerHTML += '<div class="empty-state"><div class="icon">🔍</div><h3>未找到匹配的案例</h3><div>请调整筛选条件</div></div>'; return; }
@@ -335,7 +382,8 @@ function renderCaseList(cases) {
   const detail = document.createElement('div'); detail.className = 'detail-container'; content.appendChild(detail);
   for (const c of cases) {
     const card = document.createElement('div'); card.className = 'card'; card.dataset.id = c.id;
-    card.innerHTML = `<div class="card-header"><div class="card-title">${esc(c.name)}</div><span class="badge sev-${c.severity}">${esc(c.severity)}</span></div><div class="card-meta"><span>${esc(c.date)}</span><span>|</span><span>${esc(c.channel_label)}</span><span>|</span><span>${esc(c.case_no||'—')}</span>${c.violation_count ? `<span>|</span><span>${c.violation_count}项违规</span>` : ''}</div><div class="card-tags">${(c.categories||[]).slice(0,4).map(cat => `<span class="badge" style="background:var(--c-accent-light);color:var(--c-accent);font-size:11px">${esc(cat)}</span>`).join(' ')}</div><div class="card-preview">${esc(trunc(c.penalty, 100))}</div>`;
+    const srcLabel = (c.source||'').includes('中基协')?'中基协':(c.source||'').includes('证监会')?'证监会':(c.source||'其他');
+    card.innerHTML = `<div class="card-header"><div class="card-title">${esc(c.party||c.name)}</div><span class="badge sev-${c.severity}">${esc(c.severity)}</span></div><div class="card-meta"><span style="color:var(--c-accent)">[${esc(srcLabel)}]</span><span>${esc(c.date)}</span><span>|</span><span>${esc(c.case_no||'—')}</span><span>|</span><span>${esc(c.agency||'')}</span></div><div class="card-tags">${(c.tags||[]).slice(0,5).map(tag => { const short = tag.split('/').pop(); return `<span class="badge" style="background:var(--c-accent-light);color:var(--c-accent);font-size:11px">${esc(short)}</span>`; }).join(' ')}</div><div class="card-preview">${esc(trunc(c.penalty, 100))}</div>`;
     card.addEventListener('click', () => showCaseDetail(c)); list.appendChild(card);
   }
 }
@@ -345,10 +393,11 @@ function showCaseDetail(c) {
   list.style.display = 'none'; detail.classList.add('active'); detail.innerHTML = ''; caseState.expandedId = c.id;
   const fullText = caseState.fullTexts[c.id] || '';
   let html = `<button class="detail-back">← 返回列表</button>
-    <div class="detail-title">${esc(c.name)}</div>
+    <div class="detail-title">${esc(c.party||c.name)}</div>
     <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px">
       <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2);white-space:nowrap;width:80px">处罚机构</td><td style="padding:6px 0">${esc(c.agency||'—')}</td></tr>
-      <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2)">被处罚对象</td><td style="padding:6px 0"><strong>${esc(c.name)}</strong> <span class="badge" style="background:var(--c-accent-light);color:var(--c-accent)">${esc(c.channel_label)}</span></td></tr>
+      <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2)">被处罚对象</td><td style="padding:6px 0"><strong>${esc(c.party||c.name)}</strong> <span class="badge" style="background:var(--c-accent-light);color:var(--c-accent)">${esc(c.party_type||'')}</span></td></tr>
+      <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2)">来源</td><td style="padding:6px 0"><span class="badge" style="background:var(--c-accent-light);color:var(--c-accent)">${esc(c.source||'')}</span></td></tr>
       <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2)">时间</td><td style="padding:6px 0">${esc(c.date)}${c.case_no ? ' &nbsp;|&nbsp; 文号：'+esc(c.case_no) : ''}</td></tr>
       <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2)">监管措施</td><td style="padding:6px 0"><span class="badge sev-${c.severity}">${esc(c.severity)}</span> <strong style="color:var(--c-red)">${esc(c.penalty)}</strong></td></tr>
     </table>`;
@@ -363,9 +412,20 @@ function showCaseDetail(c) {
     html += '</div>';
   }
 
-  // Categories
-  if (c.categories.length) {
-    html += `<div class="detail-section"><h3>🏷️ 违规类型</h3><div class="card-tags">${c.categories.map(cat => `<span class="badge" style="background:var(--c-accent-light);color:var(--c-accent);font-size:12px">${esc(cat)}</span>`).join(' ')}</div></div>`;
+  // Tags (两级分类)
+  if ((c.tags||[]).length) {
+    html += '<div class="detail-section"><h3>🏷️ 违规分类</h3><div style="display:flex;flex-wrap:wrap;gap:4px">';
+    // Group by L1
+    const byL1 = {};
+    for (const tag of (c.tags||[])) {
+      const [l1, l2] = tag.split('/');
+      if (!byL1[l1]) byL1[l1] = [];
+      byL1[l1].push(l2);
+    }
+    for (const [l1, l2s] of Object.entries(byL1)) {
+      html += `<div style="margin:4px 0"><span class="badge" style="background:var(--c-accent);color:#fff;font-size:12px;margin-right:4px">${esc(l1)}</span>${l2s.map(l2 => `<span class="badge" style="background:var(--c-accent-light);color:var(--c-accent);font-size:11px">${esc(l2)}</span>`).join(' ')}</div>`;
+    }
+    html += '</div></div>';
   }
 
   // Laws violated
