@@ -403,11 +403,20 @@ function showCaseDetail(c) {
     </table>`;
 
   // Violations
-  if (c.violations.length) {
+  if ((c.violations||[]).length) {
     html += '<div class="detail-section"><h3>📋 违规事项</h3>';
     const realV = c.violations.filter(v => v.length > 15);
     for (let i = 0; i < realV.length; i++) {
       html += `<div style="margin:6px 0;padding:8px 12px;background:var(--c-bg);border-radius:4px;font-size:13px;line-height:1.6"><strong style="color:var(--c-accent)">${i+1}.</strong> ${esc(realV[i])}</div>`;
+    }
+    html += '</div>';
+  }
+  // Defense
+  if ((c.defense||[]).length) {
+    html += '<div class="detail-section"><h3>💬 申辩意见</h3><div class="detail-warning" style="background:#f0f4ff;color:var(--c-accent)">当事人提出以下申辩意见</div>';
+    const realD = c.defense.filter(d => d.length > 15);
+    for (let i = 0; i < realD.length; i++) {
+      html += `<div style="margin:6px 0;padding:8px 12px;background:#fafbff;border:1px solid #e0e5f0;border-radius:4px;font-size:13px;line-height:1.6"><strong style="color:#6b7db3">申辩${i+1}.</strong> ${esc(realD[i])}</div>`;
     }
     html += '</div>';
   }
