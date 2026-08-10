@@ -280,7 +280,7 @@ async function loadCaseModule() {
     const [r1, r2] = await Promise.all([fetch('data/cases.json'), fetch('data/cases_full.json')]);
     caseState.cases = await r1.json(); caseState.fullTexts = await r2.json(); caseState.filtered = [...caseState.cases];
     caseState.fuse = new Fuse(caseState.cases, {
-      keys: [{name:'party',weight:0.4},{name:'case_no',weight:0.2},{name:'penalty',weight:0.15},{name:'tags',weight:0.15},{name:'content_preview',weight:0.1}],
+      keys: [{name:'party',weight:0.3},{name:'content_preview',weight:0.3},{name:'tags',weight:0.2},{name:'case_no',weight:0.1},{name:'penalty',weight:0.1}],
       threshold: 0.35, distance: 100, minMatchCharLength: 1, includeScore: true, includeMatches: true, ignoreLocation: true, ignoreFieldNorm: true
     });
     renderCaseSidebar(); renderCaseList(caseState.cases); bindCaseEvents();
