@@ -320,7 +320,7 @@ function renderCaseSidebar() {
   let h = '<div class="sidebar-section"><div class="sidebar-title">处罚来源</div>';
   h += `<div class="filter-item${caseState.activeSrc==='all'?' active':''}" data-src="all"><span class="filter-name">全部</span><span class="filter-count">${srcs.all}</span></div>`;
   for (const [s,n] of Object.entries(srcs)) { if (s==='all') continue;
-    const short = s.includes('中基协')?'中基协':s.includes('证监会')?'证监会派出机构':s.length>6?s.slice(0,10)+'…':s;
+    const short = s.includes('中基协')?'中基协':s.includes('证券交易')?'上交所':s.includes('北京证券交易所')?'北交所':s.includes('全国股转')?'股转':s;
     h += `<div class="filter-item${caseState.activeSrc===s?' active':''}" data-src="${s}"><span class="filter-name">${short}</span><span class="filter-count">${n}</span></div>`; }
   h += '</div>';
 
@@ -382,7 +382,7 @@ function renderCaseList(cases) {
   const detail = document.createElement('div'); detail.className = 'detail-container'; content.appendChild(detail);
   for (const c of cases) {
     const card = document.createElement('div'); card.className = 'card'; card.dataset.id = c.id;
-    const srcLabel = (c.source||'').includes('中基协')?'中基协':(c.source||'').includes('证监会')?'证监会':(c.source||'其他');
+    const srcLabel = (c.source||'').includes('中基协')?'中基协':(c.source||'').includes('证券')?(c.source||''):(c.source||'其他');
     card.innerHTML = `<div class="card-header"><div class="card-title">${esc(c.party||c.name)}${c.position ? `<span class="badge" style="background:#f0f0f0;color:#666;font-size:11px;margin-left:6px">${esc(c.position)}</span>` : ''}</div><span class="badge sev-${c.severity}">${esc(c.severity)}</span></div><div class="card-meta"><span style="color:var(--c-accent)">[${esc(srcLabel)}]</span><span>${esc(c.date)}</span><span>|</span><span>${esc(c.case_no||'—')}</span><span>|</span><span>${esc(c.agency||'')}</span></div><div class="card-tags">${(c.tags||[]).slice(0,5).map(tag => { const short = tag.split('/').pop(); return `<span class="badge" style="background:var(--c-accent-light);color:var(--c-accent);font-size:11px">${esc(short)}</span>`; }).join(' ')}</div><div class="card-preview">${esc(trunc(c.penalty, 100))}</div>`;
     card.addEventListener('click', () => showCaseDetail(c)); list.appendChild(card);
   }
