@@ -383,7 +383,7 @@ function renderCaseList(cases) {
   for (const c of cases) {
     const card = document.createElement('div'); card.className = 'card'; card.dataset.id = c.id;
     const srcLabel = (c.source||'').includes('中基协')?'中基协':(c.source||'').includes('证监会')?'证监会':(c.source||'其他');
-    card.innerHTML = `<div class="card-header"><div class="card-title">${esc(c.party||c.name)}</div><span class="badge sev-${c.severity}">${esc(c.severity)}</span></div><div class="card-meta"><span style="color:var(--c-accent)">[${esc(srcLabel)}]</span><span>${esc(c.date)}</span><span>|</span><span>${esc(c.case_no||'—')}</span><span>|</span><span>${esc(c.agency||'')}</span></div><div class="card-tags">${(c.tags||[]).slice(0,5).map(tag => { const short = tag.split('/').pop(); return `<span class="badge" style="background:var(--c-accent-light);color:var(--c-accent);font-size:11px">${esc(short)}</span>`; }).join(' ')}</div><div class="card-preview">${esc(trunc(c.penalty, 100))}</div>`;
+    card.innerHTML = `<div class="card-header"><div class="card-title">${esc(c.party||c.name)}${c.position ? `<span class="badge" style="background:#f0f0f0;color:#666;font-size:11px;margin-left:6px">${esc(c.position)}</span>` : ''}</div><span class="badge sev-${c.severity}">${esc(c.severity)}</span></div><div class="card-meta"><span style="color:var(--c-accent)">[${esc(srcLabel)}]</span><span>${esc(c.date)}</span><span>|</span><span>${esc(c.case_no||'—')}</span><span>|</span><span>${esc(c.agency||'')}</span></div><div class="card-tags">${(c.tags||[]).slice(0,5).map(tag => { const short = tag.split('/').pop(); return `<span class="badge" style="background:var(--c-accent-light);color:var(--c-accent);font-size:11px">${esc(short)}</span>`; }).join(' ')}</div><div class="card-preview">${esc(trunc(c.penalty, 100))}</div>`;
     card.addEventListener('click', () => showCaseDetail(c)); list.appendChild(card);
   }
 }
@@ -393,10 +393,10 @@ function showCaseDetail(c) {
   list.style.display = 'none'; detail.classList.add('active'); detail.innerHTML = ''; caseState.expandedId = c.id;
   const fullText = caseState.fullTexts[c.id] || '';
   let html = `<button class="detail-back">← 返回列表</button>
-    <div class="detail-title">${esc(c.party||c.name)}</div>
+    <div class="detail-title">${esc(c.party||c.name)}${c.position ? `<span class="badge" style="background:#f0f0f0;color:#666;font-size:12px;margin-left:8px">${esc(c.position)}</span>` : ''}</div>
     <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px">
       <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2);white-space:nowrap;width:80px">处罚机构</td><td style="padding:6px 0">${esc(c.agency||'—')}</td></tr>
-      <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2)">被处罚对象</td><td style="padding:6px 0"><strong>${esc(c.party||c.name)}</strong> <span class="badge" style="background:var(--c-accent-light);color:var(--c-accent)">${esc(c.party_type||'')}</span></td></tr>
+      <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2)">被处罚对象</td><td style="padding:6px 0"><strong>${esc(c.party||c.name)}</strong> <span class="badge" style="background:var(--c-accent-light);color:var(--c-accent)">${esc(c.party_type||'')}</span>${c.position ? `<span style="color:var(--c-text2);margin-left:8px">${esc(c.position)}</span>` : ''}</td></tr>
       <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2)">来源</td><td style="padding:6px 0"><span class="badge" style="background:var(--c-accent-light);color:var(--c-accent)">${esc(c.source||'')}</span></td></tr>
       <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2)">时间</td><td style="padding:6px 0">${esc(c.date)}${c.case_no ? ' &nbsp;|&nbsp; 文号：'+esc(c.case_no) : ''}</td></tr>
       <tr><td style="padding:6px 12px 6px 0;color:var(--c-text2)">监管措施</td><td style="padding:6px 0"><span class="badge sev-${c.severity}">${esc(c.severity)}</span> <strong style="color:var(--c-red)">${esc(c.penalty)}</strong></td></tr>
